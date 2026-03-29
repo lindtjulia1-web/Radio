@@ -382,7 +382,7 @@
     let audioInitialized = false;
 
     let tuningAngle = 0;
-    let volumeAngle = 100;    // начальное положение ~85% громкости
+    let volumeAngle = -140;    // начальное положение 0% громкости
 
     const FREQ_MIN = 87.5, FREQ_MAX = 108.0;
     const STATIONS = [89.1, 91.5, 93.7, 96.2, 99.8, 102.1, 104.5, 107.0];
@@ -500,7 +500,7 @@
         const maxA  = parseFloat(document.getElementById('maxAngle').value);
 
         const norm  = ((tuningAngle % 360) + 360) % 360;
-        const t     = norm > 180 ? norm - 360 : norm;
+        const t      = norm > 180 ? norm - 360 : norm;
         const ratio = (t + 180) / 360;
         const arrowAngle = minA + ratio * (maxA - minA);
 
