@@ -124,7 +124,6 @@
             background-position: center;
         }
 
-        /* Слои */
         #body-layer {
             position: absolute;
             width: 100%; height: 100%;
@@ -145,7 +144,6 @@
             transition: transform 0.05s linear;
         }
 
-        /* Ручки */
         .knob-marker {
             position: absolute;
             border-radius: 50%;
@@ -164,7 +162,6 @@
         }
         .knob-marker:active { cursor: grabbing; border-color: #888; }
 
-        /* Индикатор на ручке (маленькая метка направления) */
         .knob-dot {
             width: 4px;
             height: 30%;
@@ -178,7 +175,6 @@
             transform-origin: bottom center;
         }
 
-        /* Кнопка питания */
         #btn-marker {
             position: absolute;
             border-radius: 50%;
@@ -198,7 +194,6 @@
         #btn-marker:hover  { border-color: #aaa; }
         #btn-marker.on     { background: #0f2a0f; border-color: #00c853; color: #00c853; }
 
-        /* LED */
         #led-marker {
             position: absolute;
             border-radius: 50%;
@@ -213,7 +208,6 @@
             box-shadow: 0 0 10px #00e676;
         }
 
-        /* Строка состояния */
         #status-bar {
             position: absolute;
             bottom: 0; left: 0; right: 0;
@@ -312,9 +306,9 @@
 
     <div class="section-title">4. Звуковые файлы</div>
     <label>Шум (mp3)</label>
-    <input type="text" id="noiseFile" value="1.mp3" oninput="updateAudioSources()">
+    <input type="text" id="noiseFile" value="radio_noise.mp3" oninput="updateAudioSources()">
     <label>Сигнал (mp3)</label>
-    <input type="text" id="signalFile" value="2.mp3" oninput="updateAudioSources()">
+    <input type="text" id="signalFile" value="voice_clean.mp3" oninput="updateAudioSources()">
     <label>Целевой угол стрелки (°)</label>
     <input type="number" id="targetAngle" value="0" step="1">
 
@@ -384,23 +378,17 @@
 <audio id="audio-signal" loop></audio>
 
 <script>
-    /* ─────────────────────────── Состояние ─────────────────────────── */
     let isPowerOn        = false;
     let audioInitialized = false;
 
-    // Углы вращения ручек (в градусах, накопленные)
     let tuningAngle = 0;
     let volumeAngle = 100;    // начальное положение ~85% громкости
 
-    // Диапазон частот
     const FREQ_MIN = 87.5, FREQ_MAX = 108.0;
-
-    // «Станции» для индикатора сигнала
     const STATIONS = [89.1, 91.5, 93.7, 96.2, 99.8, 102.1, 104.5, 107.0];
 
     const signalBars = ['sb1','sb2','sb3','sb4','sb5'].map(id => document.getElementById(id));
 
-    /* ─────────────────────── Инициализация ─────────────────────────── */
     window.addEventListener('DOMContentLoaded', () => {
         updateImages();
         updateStyles();
@@ -409,7 +397,6 @@
         setupKnobWheel();
     });
 
-    /* ─────────────────────── Изображения ───────────────────────────── */
     function updateImages() {
         const bodyUrl  = document.getElementById('bodyUrl').value.trim();
         const arrowUrl = document.getElementById('arrowUrl').value.trim();
@@ -421,21 +408,18 @@
         const hasBg = !!knobsUrl;
         ['tuning-marker','volume-marker'].forEach(id => {
             const el = document.getElementById(id);
-            el.style.backgroundImage   = hasBg ? `url(${knobsUrl})` : 'none';
-            el.style.backgroundColor   = hasBg ? 'transparent' : '#2a2a2a';
-            el.style.border            = hasBg ? 'none' : '2px solid #444';
-            // скрыть точку-индикатор если картинка задана (она уже нарисована на текстуре)
+            el.style.backgroundImage = hasBg ? `url(${knobsUrl})` : 'none';
+            el.style.backgroundColor = hasBg ? 'transparent' : '#2a2a2a';
+            el.style.border          = hasBg ? 'none' : '2px solid #444';
             el.querySelector('.knob-dot').style.display = hasBg ? 'none' : 'block';
         });
     }
 
-    /* ─────────────────────── Позиции / стили ───────────────────────── */
     function updateStyles() {
         const box = document.getElementById('radioBox');
         const W   = box.offsetWidth;
         const H   = box.offsetHeight;
 
-        /* 1. Стрелка */
         const arrX  = parseFloat(document.getElementById('posX').value)  / 100 * W;
         const arrY  = parseFloat(document.getElementById('posY').value)  / 100 * H;
         const arrW  = parseFloat(document.getElementById('size').value);
@@ -444,44 +428,39 @@
         const maxA  = parseFloat(document.getElementById('maxAngle').value);
 
         const arrow = document.getElementById('arrow-layer');
-        arrow.style.left          = arrX + 'px';
-        arrow.style.top           = arrY + 'px';
-        arrow.style.width         = arrW + 'px';
-        arrow.style.height        = (pivot + arrW) + 'px';
+        arrow.style.left            = arrX + 'px';
+        arrow.style.top             = arrY + 'px';
+        arrow.style.width           = arrW + 'px';
+        arrow.style.height          = (pivot + arrW) + 'px';
         arrow.style.transformOrigin = `50% ${pivot}px`;
 
-        // Обновить лимиты слайдера
         const slider = document.getElementById('testRot');
         slider.min = minA;
         slider.max = maxA;
         if (parseFloat(slider.value) < minA) slider.value = minA;
         if (parseFloat(slider.value) > maxA) slider.value = maxA;
 
-        /* 2. Ручка настройки */
-        const bX   = parseFloat(document.getElementById('knobBigX').value)   / 100 * W;
-        const bY   = parseFloat(document.getElementById('knobBigY').value)   / 100 * H;
-        const bSz  = parseFloat(document.getElementById('knobBigSize').value);
+        const bX  = parseFloat(document.getElementById('knobBigX').value)   / 100 * W;
+        const bY  = parseFloat(document.getElementById('knobBigY').value)   / 100 * H;
+        const bSz = parseFloat(document.getElementById('knobBigSize').value);
         setKnobPosition('tuning-marker', bX - bSz/2, bY - bSz/2, bSz);
 
-        /* 3. Ручка громкости */
-        const sX   = parseFloat(document.getElementById('knobSmallX').value) / 100 * W;
-        const sY   = parseFloat(document.getElementById('knobSmallY').value) / 100 * H;
-        const sSz  = parseFloat(document.getElementById('knobSmallSize').value);
+        const sX  = parseFloat(document.getElementById('knobSmallX').value) / 100 * W;
+        const sY  = parseFloat(document.getElementById('knobSmallY').value) / 100 * H;
+        const sSz = parseFloat(document.getElementById('knobSmallSize').value);
         setKnobPosition('volume-marker', sX - sSz/2, sY - sSz/2, sSz);
 
-        /* 5. Фон */
         const isTransparent = document.getElementById('transparentBg').checked;
         const customBg      = document.getElementById('customBgUrl').value.trim();
         if (isTransparent) {
             box.style.background = 'transparent';
             box.style.border     = '1px dashed #555';
         } else {
-            box.style.background    = '#0a0a0a';
-            box.style.border        = '1px dashed #2c2c2c';
+            box.style.background      = '#0a0a0a';
+            box.style.border          = '1px dashed #2c2c2c';
             box.style.backgroundImage = customBg ? `url(${customBg})` : 'none';
         }
 
-        /* 6. Кнопка питания и LED */
         const btnX = parseFloat(document.getElementById('btnX').value) / 100 * W;
         const btnY = parseFloat(document.getElementById('btnY').value) / 100 * H;
         const ledX = parseFloat(document.getElementById('ledX').value) / 100 * W;
@@ -499,7 +478,6 @@
         led.style.width  = '12px';
         led.style.height = '12px';
 
-        // Перерисовать ручки и стрелку по текущим углам
         renderKnobs();
         renderArrow();
     }
@@ -512,7 +490,6 @@
         el.style.height = size + 'px';
     }
 
-    /* ─────────────────────── Рендер ручек / стрелки ────────────────── */
     function renderKnobs() {
         document.getElementById('tuning-marker').style.transform = `rotate(${tuningAngle}deg)`;
         document.getElementById('volume-marker').style.transform = `rotate(${volumeAngle}deg)`;
@@ -522,30 +499,25 @@
         const minA  = parseFloat(document.getElementById('minAngle').value);
         const maxA  = parseFloat(document.getElementById('maxAngle').value);
 
-        // Нормализуем накопленный угол ручки к диапазону стрелки
-        // Один полный оборот ручки = полный диапазон стрелки
-        const norm  = ((tuningAngle % 360) + 360) % 360;          // 0..360
-        const t     = norm > 180 ? norm - 360 : norm;              // -180..180
-        const ratio = (t + 180) / 360;                             // 0..1
+        const norm  = ((tuningAngle % 360) + 360) % 360;
+        const t     = norm > 180 ? norm - 360 : norm;
+        const ratio = (t + 180) / 360;
         const arrowAngle = minA + ratio * (maxA - minA);
 
         const arrow = document.getElementById('arrow-layer');
         arrow.style.transform = `rotate(${arrowAngle.toFixed(2)}deg)`;
 
-        // Синхронизируем слайдер
         const slider = document.getElementById('testRot');
         slider.value = arrowAngle;
         document.getElementById('testRotLabel').innerText =
             `Тест поворота стрелки: ${arrowAngle.toFixed(1)}°`;
 
-        // Частота
         const freq = FREQ_MIN + ratio * (FREQ_MAX - FREQ_MIN);
         document.getElementById('freq-display').textContent = freq.toFixed(1) + ' MHz';
         updateSignalBars(freq);
         updateAudioVolumes(arrowAngle);
     }
 
-    /* ─────────────────────── Индикатор сигнала ─────────────────────── */
     function updateSignalBars(freq) {
         let strength = 0;
         for (const s of STATIONS) {
@@ -556,7 +528,6 @@
         signalBars.forEach((b, i) => b.classList.toggle('active', i < level));
     }
 
-    /* ─────────────────────── Слайдер (ручной тест) ─────────────────── */
     function onSliderInput() {
         const angle = parseFloat(document.getElementById('testRot').value);
         document.getElementById('testRotLabel').innerText =
@@ -565,7 +536,6 @@
         updateAudioVolumes(angle);
     }
 
-    /* ─────────────────────── Drag ручек ────────────────────────────── */
     let dragState = null;
 
     function setupKnobDrag(knobId, type) {
@@ -595,7 +565,6 @@
         e.preventDefault();
         const el  = document.getElementById(dragState.type === 'tuning' ? 'tuning-marker' : 'volume-marker');
         let delta = getMouseAngle(e, el) - dragState.startMouseAngle;
-        // Нормализация, чтобы не прыгать при пересечении 180°/-180°
         if (delta >  180) delta -= 360;
         if (delta < -180) delta += 360;
         applyKnobDelta(dragState.type, dragState.startKnobAngle + delta);
@@ -619,7 +588,6 @@
             tuningAngle = newAngle;
             renderArrow();
         } else {
-            // Ручка громкости: ограничиваем диапазон (-140°..140°)
             volumeAngle = Math.max(-140, Math.min(140, newAngle));
             updateVolumeFromKnob();
         }
@@ -641,7 +609,6 @@
         return Math.atan2(t.clientY - cy, t.clientX - cx) * (180 / Math.PI);
     }
 
-    /* ─────────────────────── Колесо мыши ───────────────────────────── */
     function setupKnobWheel() {
         document.getElementById('tuning-marker').addEventListener('wheel', e => {
             e.preventDefault();
@@ -658,66 +625,55 @@
         }, { passive: false });
     }
 
-    /* ─────────────────────── Громкость ручки ───────────────────────── */
     function updateVolumeFromKnob() {
         if (!isPowerOn) return;
-        // volumeAngle: -140 = тихо, 140 = громко
-        const vol = (volumeAngle + 140) / 280;   // 0..1
+        const vol = (volumeAngle + 140) / 280;
         const noise  = document.getElementById('audio-noise');
         const signal = document.getElementById('audio-signal');
-        // Используем || 0.6 для шума по умолчанию, чтобы не было NaN при первом включении
         noise.volume  = Math.min(1, (noise._baseVolume  !== undefined ? noise._baseVolume  : 0.6) * vol);
         signal.volume = Math.min(1, (signal._baseVolume !== undefined ? signal._baseVolume : 0)   * vol);
     }
 
     function updateAudioVolumes(arrowAngle) {
         if (!isPowerOn) return;
-        const target   = parseFloat(document.getElementById('targetAngle').value);
-        const noise    = document.getElementById('audio-noise');
-        const signal   = document.getElementById('audio-signal');
-        const distance = Math.abs(arrowAngle - target);
-        const range    = 8;
-
-        let sigVol, noiseVol;
-        if (distance < range) {
-            sigVol   = Math.pow(1 - distance / range, 2);
-            noiseVol = (1 - sigVol) * 0.6;
-        } else {
-            sigVol   = 0;
-            noiseVol = 0.6;
-        }
-        // Сохраняем «базовую» громкость для масштабирования ручкой
-        signal._baseVolume = sigVol;
-        noise._baseVolume  = noiseVol;
-
-        // Применяем с учётом положения ручки громкости
+        const target    = parseFloat(document.getElementById('targetAngle').value);
+        const noise     = document.getElementById('audio-noise');
+        const signal    = document.getElementById('audio-signal');
+        const distance  = Math.abs(arrowAngle - target);
+        const range     = 8;
         const masterVol = (volumeAngle + 140) / 280;
-        signal.volume = Math.min(1, sigVol   * masterVol);
-        noise.volume  = Math.min(1, noiseVol * masterVol);
+
+        if (distance < range) {
+            const sigVol   = Math.pow(1 - distance / range, 2);
+            const noiseVol = (1 - sigVol) * 0.6;
+            if (signal.paused) signal.play().catch(() => {});
+            signal._baseVolume = sigVol;
+            noise._baseVolume  = noiseVol;
+            signal.volume = Math.min(1, sigVol   * masterVol);
+            noise.volume  = Math.min(1, noiseVol * masterVol);
+        } else {
+            if (!signal.paused) { signal.volume = 0; signal.pause(); }
+            noise._baseVolume = 0.6;
+            noise.volume = Math.min(1, 0.6 * masterVol);
+        }
     }
 
-    /* ─────────────────────── Обновление источников аудио ───────────── */
     function updateAudioSources() {
-        // Обновляем src немедленно (даже если радио выключено)
         const noise  = document.getElementById('audio-noise');
         const signal = document.getElementById('audio-signal');
         noise.src  = document.getElementById('noiseFile').value.trim();
         signal.src = document.getElementById('signalFile').value.trim();
-        // Сбрасываем флаг, чтобы togglePower не пропустил новую инициализацию
         audioInitialized = false;
-        // Если радио было включено — перезапускаем воспроизведение
         if (isPowerOn) {
             noise.play().catch(() => {});
             signal.play().catch(() => {});
         }
     }
 
-    /* ─────────────────────── Питание ───────────────────────────────── */
     function togglePower() {
         const noise  = document.getElementById('audio-noise');
         const signal = document.getElementById('audio-signal');
 
-        // Загружаем src только если ещё не инициализировано
         if (!audioInitialized) {
             noise.src  = document.getElementById('noiseFile').value.trim();
             signal.src = document.getElementById('signalFile').value.trim();
@@ -732,22 +688,19 @@
         led.classList.toggle('on', isPowerOn);
 
         if (isPowerOn) {
-            // Инициализируем базовые громкости перед play, чтобы не было NaN
             noise._baseVolume  = 0.6;
             signal._baseVolume = 0;
             const masterVol = (volumeAngle + 140) / 280;
             noise.volume  = 0.6 * masterVol;
             signal.volume = 0;
             noise.play().catch(() => {});
-            signal.play().catch(() => {});
-            renderArrow(); // Пересчитать баланс шум/сигнал по текущему положению стрелки
+            renderArrow();
         } else {
             noise.pause();
-            signal.pause();
+            if (!signal.paused) signal.pause();
         }
     }
 
-    /* ─────────────────────── Копирование конфига ───────────────────── */
     function copyConfig() {
         const cfg = {
             images: {
@@ -797,7 +750,6 @@
             .catch(err => alert('Ошибка копирования: ' + err));
     }
 
-    /* ─────────────────────── Ресайз ────────────────────────────────── */
     window.addEventListener('resize', updateStyles);
 </script>
 </body>
