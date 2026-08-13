@@ -1,756 +1,356 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Мастер Радио-Сигнала</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; margin: 0; height: 100vh; overflow: hidden; }
+<div id="FX_ROOT_RADIO" style="width:100%;height:100%;position:relative;overflow:hidden;box-sizing:border-box;">
+<style>
+#FX_ROOT_RADIO{font-family:Arial,sans-serif;background:#1a1a1a;color:#fff;display:flex;width:100%;height:100%;overflow:hidden;box-sizing:border-box}
+#FX_ROOT_RADIO *{box-sizing:border-box}
+#FX_ROOT_RADIO .rsg-panel{width:380px;flex:0 0 380px;background:#141416;padding:20px;border-right:2px solid #ff0033;overflow-y:auto}
+#FX_ROOT_RADIO h2{color:#ff0033;font-size:18px;text-transform:uppercase;text-align:center;margin:0 0 15px;letter-spacing:1px}
+#FX_ROOT_RADIO label{display:block;font-size:11px;font-weight:bold;margin:0 0 5px;color:#8a8a8a;text-transform:uppercase}
+#FX_ROOT_RADIO input[type=text],#FX_ROOT_RADIO input[type=number]{width:100%;background:#000;border:1px solid #2c2c2c;color:#fff;padding:10px;margin-bottom:12px;border-radius:4px}
+#FX_ROOT_RADIO input:focus{border-color:#ff0033;outline:none}
+#FX_ROOT_RADIO input[type=checkbox]{margin:0 8px 12px 0;transform:scale(1.2);cursor:pointer}
+#FX_ROOT_RADIO input[type=range]{width:100%;accent-color:#ff0033;margin-bottom:12px}
+#FX_ROOT_RADIO .section-title{color:#ffcc00;font-size:12px;text-transform:uppercase;font-weight:bold;margin:15px 0 10px}
+#FX_ROOT_RADIO .blue{color:#00bfff}.red{color:#ff3333}.green{color:#00e676}.purple{color:#e040fb}
+#FX_ROOT_RADIO .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#FX_ROOT_RADIO .buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;padding-top:15px;border-top:1px solid #222}
+#FX_ROOT_RADIO button{padding:14px;border:0;color:#fff;font-weight:bold;cursor:pointer;border-radius:4px;text-transform:uppercase}
+#FX_ROOT_RADIO .update{background:#e6002e}.copy{background:#2f2f33}
+#FX_ROOT_RADIO .rsg-viewport{flex:1;display:flex;justify-content:center;align-items:center;background:#050505;position:relative;min-width:0}
+#FX_ROOT_RADIO .radio{position:relative;width:min(600px,90%);aspect-ratio:3/2;background:#0a0a0a;border:1px dashed #2c2c2c;overflow:hidden}
+#FX_ROOT_RADIO #body{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;pointer-events:none;z-index:1}
+#FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform}
+#FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:4;cursor:grab;pointer-events:auto;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none}
+#FX_ROOT_RADIO .knob:active{cursor:grabbing}
+#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555;user-select:none}
+#FX_ROOT_RADIO #power.on{background:#0f2a0f;border-color:#00c853;color:#00c853}
+#FX_ROOT_RADIO #led{position:absolute;border-radius:50%;z-index:5;background:#1a1a1a;border:1px solid #333;pointer-events:none}
+#FX_ROOT_RADIO #led.on{background:#00e676;box-shadow:0 0 10px #00e676}
+#FX_ROOT_RADIO #status{position:absolute;left:0;right:0;bottom:0;z-index:10;background:rgba(0,0,0,.65);padding:4px 12px;font-size:11px;color:#888;display:flex;justify-content:space-between;align-items:center}
+#FX_ROOT_RADIO #freq{color:#00e676;font-weight:bold}
+#FX_ROOT_RADIO .bars{display:flex;align-items:flex-end;gap:3px;height:16px}.sbar{width:4px;background:#333;border-radius:1px}.sbar.active{background:#00e676}
+#FX_ROOT_RADIO #success{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;pointer-events:none;background:rgba(0,0,0,.94);border:2px solid #ffcc00;border-radius:14px;padding:22px 32px;text-align:center;box-shadow:0 0 35px rgba(255,204,0,.35);transition:.3s}
+#FX_ROOT_RADIO #success.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#FX_ROOT_RADIO #success b{display:block;color:#ffcc00;font-size:24px;margin-bottom:7px}
+@media(max-width:800px){#FX_ROOT_RADIO .rsg-panel{width:290px;flex-basis:290px;padding:12px}}
+</style>
 
-        #panel {
-            width: 380px;
-            background: #141416;
-            padding: 20px;
-            border-right: 2px solid #ff0033;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
+<div class="rsg-panel">
+<h2>Мастер Радио-Сигнала</h2>
 
-        h2 {
-            color: #ff0033;
-            font-size: 18px;
-            text-transform: uppercase;
-            text-align: center;
-            margin-top: 0;
-            letter-spacing: 1px;
-        }
+<label>Изображение корпуса (URL)</label>
+<input type="text" data-id="bodyUrl" value="1.png">
 
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #8a8a8a;
-            text-transform: uppercase;
-        }
+<label>Изображение стрелки (URL)</label>
+<input type="text" data-id="arrowUrl" value="2.png">
 
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            background: #000;
-            border: 1px solid #2c2c2c;
-            color: #fff;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
+<label>Изображение ручек (URL)</label>
+<input type="text" data-id="knobsUrl" value="3.png">
 
-        input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-            margin-bottom: 15px;
-            transform: scale(1.2);
-            cursor: pointer;
-        }
-
-        input:focus { border-color: #ff0033; outline: none; }
-
-        input[type="range"] {
-            width: 100%;
-            margin-bottom: 15px;
-            cursor: pointer;
-            accent-color: #ff0033;
-        }
-
-        .section-title {
-            color: #ffcc00;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin: 15px 0 10px 0;
-        }
-        .section-title.blue   { color: #00bfff; }
-        .section-title.red    { color: #ff3333; }
-        .section-title.green  { color: #00e676; }
-        .section-title.purple { color: #e040fb; }
-
-        .grid-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #222;
-        }
-
-        button {
-            padding: 15px;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-
-        .btn-update { background: #e6002e; }
-        .btn-update:hover { background: #ff1a4a; }
-        .btn-copy { background: #2f2f33; }
-        .btn-copy:hover { background: #3f3f44; }
-
-        #viewport {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #050505;
-            position: relative;
-        }
-
-        .radio-container {
-            position: relative;
-            width: 600px;
-            height: 400px;
-            border: 1px dashed #2c2c2c;
-            background: #0a0a0a;
-            background-size: cover;
-            background-position: center;
-        }
-
-        #body-layer {
-            position: absolute;
-            width: 100%; height: 100%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        #arrow-layer {
-            position: absolute;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: top center;
-            pointer-events: none;
-            z-index: 2;
-            transition: transform 0.05s linear;
-        }
-
-        .knob-marker {
-            position: absolute;
-            border-radius: 50%;
-            z-index: 4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            pointer-events: auto;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: #2a2a2a;
-            border: 2px solid #444;
-            transition: border-color 0.15s;
-        }
-        .knob-marker:active { cursor: grabbing; border-color: #888; }
-
-        .knob-dot {
-            width: 4px;
-            height: 30%;
-            background: #ff3333;
-            border-radius: 2px;
-            position: absolute;
-            bottom: 54%;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none;
-            transform-origin: bottom center;
-        }
-
-        #btn-marker {
-            position: absolute;
-            border-radius: 50%;
-            z-index: 5;
-            cursor: pointer;
-            pointer-events: auto;
-            background: #1a1a1a;
-            border: 2px solid #555;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            color: #666;
-            transition: all 0.15s;
-            user-select: none;
-        }
-        #btn-marker:hover  { border-color: #aaa; }
-        #btn-marker.on     { background: #0f2a0f; border-color: #00c853; color: #00c853; }
-
-        #led-marker {
-            position: absolute;
-            border-radius: 50%;
-            z-index: 5;
-            pointer-events: none;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-        #led-marker.on {
-            background: rgba(0, 230, 118, 0.9);
-            box-shadow: 0 0 10px #00e676;
-        }
-
-        #status-bar {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.65);
-            padding: 4px 12px;
-            font-size: 11px;
-            color: #888;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-        #freq-display { color: #00e676; font-weight: bold; letter-spacing: 0.05em; }
-        .signal-bars { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
-        .sbar {
-            width: 4px;
-            border-radius: 1px;
-            background: #333;
-            transition: background 0.2s;
-        }
-        .sbar.active { background: #00e676; }
-    </style>
-</head>
-<body>
-
-<div id="panel">
-    <h2>Мастер Радио-Сигнала</h2>
-
-    <label>Изображение корпуса (URL)</label>
-    <input type="text" id="bodyUrl" value="1.png" oninput="updateImages()">
-
-    <label>Изображение стрелки (URL)</label>
-    <input type="text" id="arrowUrl" value="2.png" oninput="updateImages()">
-
-    <label>Изображение ручек (URL)</label>
-    <input type="text" id="knobsUrl" value="3.png" oninput="updateImages()">
-
-    <div class="section-title">1. Калибровка стрелки шкалы</div>
-    <div class="grid-inputs">
-        <div>
-            <label>Положение X (%)</label>
-            <input type="number" id="posX" value="73.7" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Положение Y (%)</label>
-            <input type="number" id="posY" value="43" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Размер (px)</label>
-            <input type="number" id="size" value="33" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Ось вращения Y (px)</label>
-            <input type="number" id="axisY" value="103" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Мин. угол (°)</label>
-            <input type="number" id="minAngle" value="-30" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Макс. угол (°)</label>
-            <input type="number" id="maxAngle" value="15" oninput="updateStyles()">
-        </div>
-    </div>
-
-    <label id="testRotLabel">Тест поворота стрелки: 0°</label>
-    <input type="range" id="testRot" min="-30" max="15" value="0" oninput="onSliderInput()">
-
-    <div class="section-title red">2. Ручка настройки (большая)</div>
-    <div class="grid-inputs">
-        <div>
-            <label>X (%)</label>
-            <input type="number" id="knobBigX" value="73" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Y (%)</label>
-            <input type="number" id="knobBigY" value="59" step="0.1" oninput="updateStyles()">
-        </div>
-    </div>
-    <label>Размер big (px)</label>
-    <input type="number" id="knobBigSize" value="109" oninput="updateStyles()">
-
-    <div class="section-title blue">3. Ручка звука (маленькая)</div>
-    <div class="grid-inputs">
-        <div>
-            <label>X (%)</label>
-            <input type="number" id="knobSmallX" value="11" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Y (%)</label>
-            <input type="number" id="knobSmallY" value="66" step="0.1" oninput="updateStyles()">
-        </div>
-    </div>
-    <label>Размер small (px)</label>
-    <input type="number" id="knobSmallSize" value="50" oninput="updateStyles()">
-
-    <div class="section-title">4. Звуковые файлы</div>
-    <label>Шум (mp3)</label>
-    <input type="text" id="noiseFile" value="1.mp3" oninput="updateAudioSources()">
-    <label>Сигнал (mp3)</label>
-    <input type="text" id="signalFile" value="2.mp3" oninput="updateAudioSources()">
-    <label>Целевой угол стрелки (°)</label>
-    <input type="number" id="targetAngle" value="0" step="1">
-
-    <div class="section-title green">5. Настройки фона</div>
-    <div style="display: flex; align-items: center;">
-        <input type="checkbox" id="transparentBg" onchange="updateStyles()">
-        <label for="transparentBg" style="margin-bottom: 15px; cursor: pointer;">Прозрачный фон</label>
-    </div>
-    <label>URL кастомного фона</label>
-    <input type="text" id="customBgUrl" placeholder="https://..." oninput="updateStyles()">
-
-    <div class="section-title purple">6. Питание (кнопка и индикатор)</div>
-    <div class="grid-inputs">
-        <div>
-            <label>Кнопка X (%)</label>
-            <input type="number" id="btnX" value="21.1" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>Кнопка Y (%)</label>
-            <input type="number" id="btnY" value="65.6" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>LED X (%)</label>
-            <input type="number" id="ledX" value="21.2" step="0.1" oninput="updateStyles()">
-        </div>
-        <div>
-            <label>LED Y (%)</label>
-            <input type="number" id="ledY" value="60.8" step="0.1" oninput="updateStyles()">
-        </div>
-    </div>
-
-    <div class="button-group">
-        <button class="btn-update" onclick="updateStyles()">Обновить</button>
-        <button class="btn-copy" onclick="copyConfig()">Скопировать</button>
-    </div>
+<div class="section-title">1. Калибровка стрелки шкалы</div>
+<div class="grid">
+<div><label>X (%)</label><input type="number" data-id="posX" value="73.7" step=".1"></div>
+<div><label>Y (%)</label><input type="number" data-id="posY" value="43" step=".1"></div>
+<div><label>Размер (px)</label><input type="number" data-id="size" value="33"></div>
+<div><label>Ось вращения Y (px)</label><input type="number" data-id="axisY" value="103"></div>
+<div><label>Мин. угол (°)</label><input type="number" data-id="minAngle" value="-30"></div>
+<div><label>Макс. угол (°)</label><input type="number" data-id="maxAngle" value="15"></div>
 </div>
 
-<div id="viewport">
-    <div class="radio-container" id="radioBox">
-        <div id="body-layer"></div>
-        <div id="arrow-layer"></div>
+<label>Тест поворота стрелки: <span data-id="testLabel">0°</span></label>
+<input type="range" data-id="testRot" min="-30" max="15" value="0">
 
-        <div id="tuning-marker" class="knob-marker">
-            <div class="knob-dot" id="tuning-dot"></div>
-        </div>
-        <div id="volume-marker" class="knob-marker">
-            <div class="knob-dot" id="volume-dot"></div>
-        </div>
+<div class="section-title red">2. Ручка настройки (большая)</div>
+<div class="grid">
+<div><label>X (%)</label><input type="number" data-id="knobBigX" value="73" step=".1"></div>
+<div><label>Y (%)</label><input type="number" data-id="knobBigY" value="59" step=".1"></div>
+</div>
+<label>Размер big (px)</label><input type="number" data-id="knobBigSize" value="109">
 
-        <div id="btn-marker" onclick="togglePower()">⏻</div>
-        <div id="led-marker"></div>
+<div class="section-title blue">3. Ручка звука (маленькая)</div>
+<div class="grid">
+<div><label>X (%)</label><input type="number" data-id="knobSmallX" value="11" step=".1"></div>
+<div><label>Y (%)</label><input type="number" data-id="knobSmallY" value="66" step=".1"></div>
+</div>
+<label>Размер small (px)</label><input type="number" data-id="knobSmallSize" value="50">
 
-        <div id="status-bar">
-            <span id="freq-display">— MHz</span>
-            <span class="signal-bars">
-                <span class="sbar" id="sb1" style="height:5px"></span>
-                <span class="sbar" id="sb2" style="height:8px"></span>
-                <span class="sbar" id="sb3" style="height:11px"></span>
-                <span class="sbar" id="sb4" style="height:14px"></span>
-                <span class="sbar" id="sb5" style="height:16px"></span>
-            </span>
-        </div>
-    </div>
+<div class="section-title">4. Звуковые файлы</div>
+<label>Шум (mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
+<label>Сигнал (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
+<label>Целевой угол стрелки (°)</label><input type="number" data-id="targetAngle" value="0" step=".1">
+
+<div class="section-title green">5. Настройки фона</div>
+<label style="display:flex;align-items:center;text-transform:none;color:#aaa">
+<input type="checkbox" data-id="transparentBg">Прозрачный фон
+</label>
+<label>URL кастомного фона</label><input type="text" data-id="customBgUrl" placeholder="https://...">
+
+<div class="section-title purple">6. Питание</div>
+<div class="grid">
+<div><label>Кнопка X (%)</label><input type="number" data-id="btnX" value="21.1" step=".1"></div>
+<div><label>Кнопка Y (%)</label><input type="number" data-id="btnY" value="65.6" step=".1"></div>
+<div><label>LED X (%)</label><input type="number" data-id="ledX" value="21.2" step=".1"></div>
+<div><label>LED Y (%)</label><input type="number" data-id="ledY" value="60.8" step=".1"></div>
 </div>
 
-<audio id="audio-noise" loop></audio>
-<audio id="audio-signal" loop></audio>
+<div class="buttons">
+<button class="update" data-action="update">Обновить</button>
+<button class="copy" data-action="copy">Скопировать</button>
+</div>
+</div>
+
+<div class="rsg-viewport">
+<div class="radio" data-id="radio">
+<div id="body"></div>
+<div id="arrow"></div>
+<div id="tuning" class="knob"></div>
+<div id="volume" class="knob"></div>
+<div id="power">⏻</div>
+<div id="led"></div>
+<div id="status">
+<span id="freq">— MHz</span>
+<span class="bars"><i class="sbar" style="height:5px"></i><i class="sbar" style="height:8px"></i><i class="sbar" style="height:11px"></i><i class="sbar" style="height:14px"></i><i class="sbar" style="height:16px"></i></span>
+</div>
+<div id="success"><b>СИГНАЛ НАЙДЕН!</b>Радиосвязь установлена.</div>
+</div>
+</div>
+
+<!-- Исправлены ID тегов Audio -->
+<audio id="noiseAudio" loop></audio>
+<audio id="signalAudio" loop></audio>
 
 <script>
-    let isPowerOn        = false;
-    let audioInitialized = false;
+(function(){
+'use strict';
 
-    let tuningAngle = 0;
-    let volumeAngle = -140;    // начальное положение 0% громкости
+const ROOT=document.getElementById('FX_ROOT_RADIO');
+if(!ROOT || ROOT.dataset.ready==='1') return;
+ROOT.dataset.ready='1';
 
-    const FREQ_MIN = 87.5, FREQ_MAX = 108.0;
-    const STATIONS = [89.1, 91.5, 93.7, 96.2, 99.8, 102.1, 104.5, 107.0];
+const $=id=>ROOT.querySelector('[data-id="'+id+'"]')||ROOT.querySelector('#'+id);
+const min=()=>parseFloat($('minAngle').value)||-30;
+const max=()=>parseFloat($('maxAngle').value)||15;
+const target=()=>parseFloat($('targetAngle').value)||0;
 
-    const signalBars = ['sb1','sb2','sb3','sb4','sb5'].map(id => document.getElementById(id));
+let tuningAngle=0;
+let volumeAngle=-140;
+let powerOn=false;
+let drag=null;
+let solved=false;
 
-    window.addEventListener('DOMContentLoaded', () => {
-        updateImages();
-        updateStyles();
-        setupKnobDrag('tuning-marker', 'tuning');
-        setupKnobDrag('volume-marker', 'volume');
-        setupKnobWheel();
-    });
+const FREQ_MIN=87.5,FREQ_MAX=108;
+const STATIONS=[89.1,91.5,93.7,96.2,99.8,102.1,104.5,107.0];
+const bars=[...ROOT.querySelectorAll('.sbar')];
 
-    function updateImages() {
-        const bodyUrl  = document.getElementById('bodyUrl').value.trim();
-        const arrowUrl = document.getElementById('arrowUrl').value.trim();
-        const knobsUrl = document.getElementById('knobsUrl').value.trim();
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
-        document.getElementById('body-layer').style.backgroundImage  = bodyUrl  ? `url(${bodyUrl})`  : 'none';
-        document.getElementById('arrow-layer').style.backgroundImage = arrowUrl ? `url(${arrowUrl})` : 'none';
+function updateImages(){
+  $('body').style.backgroundImage=$('bodyUrl').value.trim()?`url("${$('bodyUrl').value.trim()}")`:'none';
+  $('arrow').style.backgroundImage=$('arrowUrl').value.trim()?`url("${$('arrowUrl').value.trim()}")`:'none';
+  const u=$('knobsUrl').value.trim();
+  ['tuning','volume'].forEach(id=>{$(id).style.backgroundImage=u?`url("${u}")`:'none';});
+}
 
-        const hasBg = !!knobsUrl;
-        ['tuning-marker','volume-marker'].forEach(id => {
-            const el = document.getElementById(id);
-            el.style.backgroundImage = hasBg ? `url(${knobsUrl})` : 'none';
-            el.style.backgroundColor = hasBg ? 'transparent' : '#2a2a2a';
-            el.style.border          = hasBg ? 'none' : '2px solid #444';
-            el.querySelector('.knob-dot').style.display = hasBg ? 'none' : 'block';
-        });
-    }
+function updateStyles(){
+  const box=$('radio'),W=box.clientWidth,H=box.clientHeight;
+  const ax=parseFloat($('posX').value)/100*W;
+  const ay=parseFloat($('posY').value)/100*H;
+  const aw=parseFloat($('size').value)||33;
+  const pivot=parseFloat($('axisY').value)||103;
 
-    function updateStyles() {
-        const box = document.getElementById('radioBox');
-        const W   = box.offsetWidth;
-        const H   = box.offsetHeight;
+  Object.assign($('arrow').style,{
+    left:ax+'px',top:ay+'px',width:aw+'px',height:(pivot+aw)+'px',
+    transformOrigin:`50% ${pivot}px`
+  });
 
-        const arrX  = parseFloat(document.getElementById('posX').value)  / 100 * W;
-        const arrY  = parseFloat(document.getElementById('posY').value)  / 100 * H;
-        const arrW  = parseFloat(document.getElementById('size').value);
-        const pivot = parseFloat(document.getElementById('axisY').value);
-        const minA  = parseFloat(document.getElementById('minAngle').value);
-        const maxA  = parseFloat(document.getElementById('maxAngle').value);
+  $('testRot').min=min(); $('testRot').max=max();
+  $('testRot').value=clamp(parseFloat($('testRot').value)||0,min(),max());
 
-        const arrow = document.getElementById('arrow-layer');
-        arrow.style.left            = arrX + 'px';
-        arrow.style.top             = arrY + 'px';
-        arrow.style.width           = arrW + 'px';
-        arrow.style.height          = (pivot + arrW) + 'px';
-        arrow.style.transformOrigin = `50% ${pivot}px`;
+  setKnob('tuning',$('knobBigX'),$('knobBigY'),$('knobBigSize'),W,H);
+  setKnob('volume',$('knobSmallX'),$('knobSmallY'),$('knobSmallSize'),W,H);
 
-        const slider = document.getElementById('testRot');
-        slider.min = minA;
-        slider.max = maxA;
-        if (parseFloat(slider.value) < minA) slider.value = minA;
-        if (parseFloat(slider.value) > maxA) slider.value = maxA;
+  const transparent=$('transparentBg').checked;
+  const bg=$('customBgUrl').value.trim();
+  box.style.background=transparent?'transparent':'#0a0a0a';
+  box.style.backgroundImage=!transparent&&bg?`url("${bg}")`:'none';
 
-        const bX  = parseFloat(document.getElementById('knobBigX').value)   / 100 * W;
-        const bY  = parseFloat(document.getElementById('knobBigY').value)   / 100 * H;
-        const bSz = parseFloat(document.getElementById('knobBigSize').value);
-        setKnobPosition('tuning-marker', bX - bSz/2, bY - bSz/2, bSz);
+  place($('power'),parseFloat($('btnX').value)/100*W-15,parseFloat($('btnY').value)/100*H-15,30);
+  place($('led'),parseFloat($('ledX').value)/100*W-6,parseFloat($('ledY').value)/100*H-6,12);
 
-        const sX  = parseFloat(document.getElementById('knobSmallX').value) / 100 * W;
-        const sY  = parseFloat(document.getElementById('knobSmallY').value) / 100 * H;
-        const sSz = parseFloat(document.getElementById('knobSmallSize').value);
-        setKnobPosition('volume-marker', sX - sSz/2, sY - sSz/2, sSz);
+  tuningAngle=clamp(tuningAngle,-135,135);
+  render();
+}
 
-        const isTransparent = document.getElementById('transparentBg').checked;
-        const customBg      = document.getElementById('customBgUrl').value.trim();
-        if (isTransparent) {
-            box.style.background = 'transparent';
-            box.style.border     = '1px dashed #555';
-        } else {
-            box.style.background      = '#0a0a0a';
-            box.style.border          = '1px dashed #2c2c2c';
-            box.style.backgroundImage = customBg ? `url(${customBg})` : 'none';
-        }
+function setKnob(el,x,y,size,W,H){
+  const s=parseFloat(size.value)||50;
+  place(el,parseFloat(x.value)/100*W-s/2,parseFloat(y.value)/100*H-s/2,s);
+}
+function place(el,x,y,w){el.style.left=x+'px';el.style.top=y+'px';el.style.width=w+'px';el.style.height=w+'px';}
 
-        const btnX = parseFloat(document.getElementById('btnX').value) / 100 * W;
-        const btnY = parseFloat(document.getElementById('btnY').value) / 100 * H;
-        const ledX = parseFloat(document.getElementById('ledX').value) / 100 * W;
-        const ledY = parseFloat(document.getElementById('ledY').value) / 100 * H;
+function tuningToArrow(){
+  const t=clamp(tuningAngle,-135,135);
+  const ratio=(t+135)/270;
+  return min()+ratio*(max()-min());
+}
 
-        const btn = document.getElementById('btn-marker');
-        btn.style.left   = (btnX - 15) + 'px';
-        btn.style.top    = (btnY - 15) + 'px';
-        btn.style.width  = '30px';
-        btn.style.height = '30px';
+function arrowToFrequency(a){
+  const r=(a-min())/(max()-min()||1);
+  return FREQ_MIN+clamp(r,0,1)*(FREQ_MAX-FREQ_MIN);
+}
 
-        const led = document.getElementById('led-marker');
-        led.style.left   = (ledX - 6) + 'px';
-        led.style.top    = (ledY - 6) + 'px';
-        led.style.width  = '12px';
-        led.style.height = '12px';
+function render(){
+  const a=tuningToArrow();
+  $('arrow').style.transform=`rotate(${a.toFixed(2)}deg)`;
+  $('tuning').style.transform=`rotate(${tuningAngle}deg)`;
+  $('volume').style.transform=`rotate(${volumeAngle}deg)`;
+  $('testRot').value=clamp(a,min(),max());
+  $('testLabel').textContent=a.toFixed(1)+'°';
 
-        renderKnobs();
-        renderArrow();
-    }
+  const f=arrowToFrequency(a);
+  $('freq').textContent=f.toFixed(1)+' MHz';
+  updateBars(f);
+  updateAudio(a);
+}
 
-    function setKnobPosition(id, x, y, size) {
-        const el = document.getElementById(id);
-        el.style.left   = x + 'px';
-        el.style.top    = y + 'px';
-        el.style.width  = size + 'px';
-        el.style.height = size + 'px';
-    }
+function updateBars(freq){
+  let strength=0;
+  for(const s of STATIONS){
+    const d=Math.abs(freq-s);
+    if(d<0.7) strength=Math.max(strength,1-d/0.7);
+  }
+  const level=Math.round(strength*5);
+  bars.forEach((b,i)=>b.classList.toggle('active',i<level));
+}
 
-    function renderKnobs() {
-        document.getElementById('tuning-marker').style.transform = `rotate(${tuningAngle}deg)`;
-        document.getElementById('volume-marker').style.transform = `rotate(${volumeAngle}deg)`;
-    }
+function masterVolume(){return clamp((volumeAngle+140)/280,0,1);}
 
-    function renderArrow() {
-        const minA  = parseFloat(document.getElementById('minAngle').value);
-        const maxA  = parseFloat(document.getElementById('maxAngle').value);
+function updateAudio(a){
+  if(!powerOn)return;
+  const noise=$('noiseAudio'),signal=$('signalAudio');
+  const d=Math.abs(a-target()),range=8;
+  const mv=masterVolume();
 
-        const norm  = ((tuningAngle % 360) + 360) % 360;
-        const t      = norm > 180 ? norm - 360 : norm;
-        const ratio = (t + 180) / 360;
-        const arrowAngle = minA + ratio * (maxA - minA);
+  if(d<=range){
+    const sig=Math.pow(1-d/range,2);
+    noise._baseVolume=(1-sig)*0.6;
+    signal._baseVolume=sig;
+    signal.volume=sig*mv;
+    noise.volume=(1-sig)*0.6*mv;
+    if(sig>0.02 && signal.paused)signal.play().catch(()=>{});
+    if(d<=0.8)win();
+  }else{
+    signal.pause(); signal.volume=0;
+    noise._baseVolume=0.6; noise.volume=0.6*mv;
+  }
+}
 
-        const arrow = document.getElementById('arrow-layer');
-        arrow.style.transform = `rotate(${arrowAngle.toFixed(2)}deg)`;
+function updateVolume(){
+  if(!powerOn)return;
+  const mv=masterVolume(),noise=$('noiseAudio'),signal=$('signalAudio');
+  noise.volume=(noise._baseVolume??0.6)*mv;
+  signal.volume=(signal._baseVolume??0)*mv;
+}
 
-        const slider = document.getElementById('testRot');
-        slider.value = arrowAngle;
-        document.getElementById('testRotLabel').innerText =
-            `Тест поворота стрелки: ${arrowAngle.toFixed(1)}°`;
+function win(){
+  if(solved)return;
+  solved=true;
+  $('success').classList.add('show');
+}
 
-        const freq = FREQ_MIN + ratio * (FREQ_MAX - FREQ_MIN);
-        document.getElementById('freq-display').textContent = freq.toFixed(1) + ' MHz';
-        updateSignalBars(freq);
-        updateAudioVolumes(arrowAngle);
-    }
+function togglePower(){
+  powerOn=!powerOn;
+  $('power').classList.toggle('on',powerOn);
+  $('led').classList.toggle('on',powerOn);
 
-    function updateSignalBars(freq) {
-        let strength = 0;
-        for (const s of STATIONS) {
-            const d = Math.abs(freq - s);
-            if (d < 0.7) strength = Math.max(strength, 1 - d / 0.7);
-        }
-        const level = Math.round(strength * 5);
-        signalBars.forEach((b, i) => b.classList.toggle('active', i < level));
-    }
+  const n=$('noiseAudio'),s=$('signalAudio');
+  if(powerOn){
+    n.src=$('noiseFile').value.trim();
+    s.src=$('signalFile').value.trim();
+    n._baseVolume=0.6;s._baseVolume=0;
+    n.volume=0.6*masterVolume();s.volume=0;
+    n.play().catch(()=>{});
+    render();
+  }else{
+    n.pause();s.pause();n.volume=0;s.volume=0;
+  }
+}
 
-    function onSliderInput() {
-        const angle = parseFloat(document.getElementById('testRot').value);
-        document.getElementById('testRotLabel').innerText =
-            `Тест поворота стрелки: ${angle.toFixed(1)}°`;
-        document.getElementById('arrow-layer').style.transform = `rotate(${angle}deg)`;
-        updateAudioVolumes(angle);
-    }
+function pointerAngle(e,el){
+  const r=el.getBoundingClientRect();
+  const x=e.clientX??e.touches?.[0]?.clientX??0;
+  const y=e.clientY??e.touches?.[0]?.clientY??0;
+  return Math.atan2(y-(r.top+r.height/2),x-(r.left+r.width/2))*180/Math.PI;
+}
 
-    let dragState = null;
+function beginDrag(e,type){
+  e.preventDefault();
+  const el=$(type==='tuning'?'tuning':'volume');
+  drag={type,start:pointerAngle(e,el),angle:type==='tuning'?tuningAngle:volumeAngle};
+  if(e.pointerId!=null)el.setPointerCapture?.(e.pointerId);
+}
 
-    function setupKnobDrag(knobId, type) {
-        const el = document.getElementById(knobId);
+function moveDrag(e){
+  if(!drag)return;
+  e.preventDefault();
+  const el=$(drag.type==='tuning'?'tuning':'volume');
+  let d=pointerAngle(e,el)-drag.start;
+  if(d>180)d-=360;if(d<-180)d+=360;
 
-        el.addEventListener('mousedown', e => {
-            e.preventDefault();
-            dragState = {
-                type,
-                startMouseAngle : getMouseAngle(e, el),
-                startKnobAngle  : type === 'tuning' ? tuningAngle : volumeAngle
-            };
-        });
+  if(drag.type==='tuning'){
+    tuningAngle=clamp(drag.angle+d,-135,135);
+  }else{
+    volumeAngle=clamp(drag.angle+d,-140,140);
+  }
+  render();updateVolume();
+}
 
-        el.addEventListener('touchstart', e => {
-            e.preventDefault();
-            dragState = {
-                type,
-                startMouseAngle : getTouchAngle(e, el),
-                startKnobAngle  : type === 'tuning' ? tuningAngle : volumeAngle
-            };
-        }, { passive: false });
-    }
+function endDrag(){drag=null;}
 
-    document.addEventListener('mousemove', e => {
-        if (!dragState) return;
-        e.preventDefault();
-        const el  = document.getElementById(dragState.type === 'tuning' ? 'tuning-marker' : 'volume-marker');
-        let delta = getMouseAngle(e, el) - dragState.startMouseAngle;
-        if (delta >  180) delta -= 360;
-        if (delta < -180) delta += 360;
-        applyKnobDelta(dragState.type, dragState.startKnobAngle + delta);
-    });
+['tuning','volume'].forEach(type=>{
+  const el=$(type);
+  el.addEventListener('pointerdown',e=>beginDrag(e,type));
+  el.addEventListener('pointermove',moveDrag);
+  el.addEventListener('pointerup',endDrag);
+  el.addEventListener('pointercancel',endDrag);
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const step=type==='tuning'?3:5;
+    if(type==='tuning')tuningAngle=clamp(tuningAngle+(e.deltaY<0?step:-step),-135,135);
+    else volumeAngle=clamp(volumeAngle+(e.deltaY<0?step:-step),-140,140);
+    render();updateVolume();
+  },{passive:false});
+});
 
-    document.addEventListener('touchmove', e => {
-        if (!dragState) return;
-        e.preventDefault();
-        const el  = document.getElementById(dragState.type === 'tuning' ? 'tuning-marker' : 'volume-marker');
-        let delta = getTouchAngle(e, el) - dragState.startMouseAngle;
-        if (delta >  180) delta -= 360;
-        if (delta < -180) delta += 360;
-        applyKnobDelta(dragState.type, dragState.startKnobAngle + delta);
-    }, { passive: false });
+$('power').addEventListener('click',togglePower);
 
-    document.addEventListener('mouseup',  () => { dragState = null; });
-    document.addEventListener('touchend', () => { dragState = null; });
+$('testRot').addEventListener('input',()=>{
+  const a=parseFloat($('testRot').value);
+  const ratio=(a-min())/(max()-min()||1);
+  tuningAngle=-135+clamp(ratio,0,1)*270;
+  render();
+});
 
-    function applyKnobDelta(type, newAngle) {
-        if (type === 'tuning') {
-            tuningAngle = newAngle;
-            renderArrow();
-        } else {
-            volumeAngle = Math.max(-140, Math.min(140, newAngle));
-            updateVolumeFromKnob();
-        }
-        renderKnobs();
-    }
+ROOT.querySelectorAll('input').forEach(el=>{
+  el.addEventListener('input',()=>{updateImages();updateStyles();});
+  el.addEventListener('change',()=>{updateImages();updateStyles();});
+});
 
-    function getMouseAngle(e, el) {
-        const r  = el.getBoundingClientRect();
-        const cx = r.left + r.width  / 2;
-        const cy = r.top  + r.height / 2;
-        return Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
-    }
+$('noiseFile').addEventListener('change',()=>{if(powerOn)$('noiseAudio').src=$('noiseFile').value.trim();});
+$('signalFile').addEventListener('change',()=>{if(powerOn)$('signalAudio').src=$('signalFile').value.trim();});
 
-    function getTouchAngle(e, el) {
-        const t  = e.touches[0];
-        const r  = el.getBoundingClientRect();
-        const cx = r.left + r.width  / 2;
-        const cy = r.top  + r.height / 2;
-        return Math.atan2(t.clientY - cy, t.clientX - cx) * (180 / Math.PI);
-    }
+ROOT.querySelector('[data-action="update"]').addEventListener('click',()=>{updateImages();updateStyles();});
+ROOT.querySelector('[data-action="copy"]').addEventListener('click',()=>{
+  const cfg={
+    body:$('bodyUrl').value,arrow:$('arrowUrl').value,knobs:$('knobsUrl').value,
+    arrowParams:{x:$('posX').value,y:$('posY').value,size:$('size').value,axisY:$('axisY').value,min:$('minAngle').value,max:$('maxAngle').value},
+    tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
+    volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
+    audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}
+  };
+  navigator.clipboard?.writeText(JSON.stringify(cfg,null,2)).then(()=>alert('Конфигурация скопирована!'));
+});
 
-    function setupKnobWheel() {
-        document.getElementById('tuning-marker').addEventListener('wheel', e => {
-            e.preventDefault();
-            tuningAngle += e.deltaY < 0 ? 3 : -3;
-            renderKnobs();
-            renderArrow();
-        }, { passive: false });
-
-        document.getElementById('volume-marker').addEventListener('wheel', e => {
-            e.preventDefault();
-            volumeAngle = Math.max(-140, Math.min(140, volumeAngle + (e.deltaY < 0 ? 5 : -5)));
-            renderKnobs();
-            updateVolumeFromKnob();
-        }, { passive: false });
-    }
-
-    function updateVolumeFromKnob() {
-        if (!isPowerOn) return;
-        const vol = (volumeAngle + 140) / 280;
-        const noise  = document.getElementById('audio-noise');
-        const signal = document.getElementById('audio-signal');
-        noise.volume  = Math.min(1, (noise._baseVolume  !== undefined ? noise._baseVolume  : 0.6) * vol);
-        signal.volume = Math.min(1, (signal._baseVolume !== undefined ? signal._baseVolume : 0)   * vol);
-    }
-
-    function updateAudioVolumes(arrowAngle) {
-        if (!isPowerOn) return;
-        const target    = parseFloat(document.getElementById('targetAngle').value);
-        const noise     = document.getElementById('audio-noise');
-        const signal    = document.getElementById('audio-signal');
-        const distance  = Math.abs(arrowAngle - target);
-        const range     = 8;
-        const masterVol = (volumeAngle + 140) / 280;
-
-        if (distance < range) {
-            const sigVol   = Math.pow(1 - distance / range, 2);
-            const noiseVol = (1 - sigVol) * 0.6;
-            if (signal.paused) signal.play().catch(() => {});
-            signal._baseVolume = sigVol;
-            noise._baseVolume  = noiseVol;
-            signal.volume = Math.min(1, sigVol   * masterVol);
-            noise.volume  = Math.min(1, noiseVol * masterVol);
-        } else {
-            if (!signal.paused) { signal.volume = 0; signal.pause(); }
-            noise._baseVolume = 0.6;
-            noise.volume = Math.min(1, 0.6 * masterVol);
-        }
-    }
-
-    function updateAudioSources() {
-        const noise  = document.getElementById('audio-noise');
-        const signal = document.getElementById('audio-signal');
-        noise.src  = document.getElementById('noiseFile').value.trim();
-        signal.src = document.getElementById('signalFile').value.trim();
-        audioInitialized = false;
-        if (isPowerOn) {
-            noise.play().catch(() => {});
-            signal.play().catch(() => {});
-        }
-    }
-
-    function togglePower() {
-        const noise  = document.getElementById('audio-noise');
-        const signal = document.getElementById('audio-signal');
-
-        if (!audioInitialized) {
-            noise.src  = document.getElementById('noiseFile').value.trim();
-            signal.src = document.getElementById('signalFile').value.trim();
-            audioInitialized = true;
-        }
-
-        const btn = document.getElementById('btn-marker');
-        const led = document.getElementById('led-marker');
-
-        isPowerOn = !isPowerOn;
-        btn.classList.toggle('on', isPowerOn);
-        led.classList.toggle('on', isPowerOn);
-
-        if (isPowerOn) {
-            noise._baseVolume  = 0.6;
-            signal._baseVolume = 0;
-            const masterVol = (volumeAngle + 140) / 280;
-            noise.volume  = 0.6 * masterVol;
-            signal.volume = 0;
-            noise.play().catch(() => {});
-            renderArrow();
-        } else {
-            noise.pause();
-            if (!signal.paused) signal.pause();
-        }
-    }
-
-    function copyConfig() {
-        const cfg = {
-            images: {
-                body  : document.getElementById('bodyUrl').value,
-                arrow : document.getElementById('arrowUrl').value,
-                knobs : document.getElementById('knobsUrl').value
-            },
-            arrow: {
-                posX     : document.getElementById('posX').value,
-                posY     : document.getElementById('posY').value,
-                size     : document.getElementById('size').value,
-                axisY    : document.getElementById('axisY').value,
-                minAngle : document.getElementById('minAngle').value,
-                maxAngle : document.getElementById('maxAngle').value
-            },
-            knobs: {
-                tuning: {
-                    x    : document.getElementById('knobBigX').value,
-                    y    : document.getElementById('knobBigY').value,
-                    size : document.getElementById('knobBigSize').value
-                },
-                volume: {
-                    x    : document.getElementById('knobSmallX').value,
-                    y    : document.getElementById('knobSmallY').value,
-                    size : document.getElementById('knobSmallSize').value
-                }
-            },
-            audio: {
-                noise       : document.getElementById('noiseFile').value,
-                signal      : document.getElementById('signalFile').value,
-                targetAngle : document.getElementById('targetAngle').value
-            },
-            background: {
-                transparent : document.getElementById('transparentBg').checked,
-                customUrl   : document.getElementById('customBgUrl').value
-            },
-            power: {
-                buttonX : document.getElementById('btnX').value,
-                buttonY : document.getElementById('btnY').value,
-                ledX    : document.getElementById('ledX').value,
-                ledY    : document.getElementById('ledY').value
-            }
-        };
-
-        navigator.clipboard.writeText(JSON.stringify(cfg, null, 2))
-            .then(() => alert('Конфигурация скопирована!'))
-            .catch(err => alert('Ошибка копирования: ' + err));
-    }
-
-    window.addEventListener('resize', updateStyles);
+updateImages();
+updateStyles();
+})();
 </script>
-</body>
-</html>
+</div>
