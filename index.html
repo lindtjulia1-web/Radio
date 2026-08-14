@@ -21,7 +21,7 @@
 #FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform}
 #FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:4;cursor:grab;pointer-events:auto;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none}
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
-#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555;user-select:none}
+#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555}
 #FX_ROOT_RADIO #power.on{background:#0f2a0f;border-color:#00c853;color:#00c853}
 #FX_ROOT_RADIO #led{position:absolute;border-radius:50%;z-index:5;background:#1a1a1a;border:1px solid #333;pointer-events:none}
 #FX_ROOT_RADIO #led.on{background:#00e676;box-shadow:0 0 10px #00e676}
@@ -114,9 +114,8 @@
 </div>
 </div>
 
-<!-- Исправлены ID тегов Audio -->
-<audio id="noiseAudio" loop></audio>
-<audio id="signalAudio" loop></audio>
+<audio data-id="noiseAudio" loop></audio>
+<audio data-id="signalAudio" loop></audio>
 
 <script>
 (function(){
@@ -236,7 +235,7 @@ function updateAudio(a){
     signal.volume=sig*mv;
     noise.volume=(1-sig)*0.6*mv;
     if(sig>0.02 && signal.paused)signal.play().catch(()=>{});
-    if(d<=0.8)win();
+    if(d<=parseFloat($('testRot').step)||d<=0.8)win();
   }else{
     signal.pause(); signal.volume=0;
     noise._baseVolume=0.6; noise.volume=0.6*mv;
@@ -276,8 +275,8 @@ function togglePower(){
 
 function pointerAngle(e,el){
   const r=el.getBoundingClientRect();
-  const x=e.clientX??e.touches?.[0]?.clientX??0;
-  const y=e.clientY??e.touches?.[0]?.clientY??0;
+  const x=e.clientX??e.touches[0].clientX;
+  const y=e.clientY??e.touches[0].clientY;
   return Math.atan2(y-(r.top+r.height/2),x-(r.left+r.width/2))*180/Math.PI;
 }
 
@@ -339,13 +338,11 @@ $('signalFile').addEventListener('change',()=>{if(powerOn)$('signalAudio').src=$
 
 ROOT.querySelector('[data-action="update"]').addEventListener('click',()=>{updateImages();updateStyles();});
 ROOT.querySelector('[data-action="copy"]').addEventListener('click',()=>{
-  const cfg={
-    body:$('bodyUrl').value,arrow:$('arrowUrl').value,knobs:$('knobsUrl').value,
-    arrowParams:{x:$('posX').value,y:$('posY').value,size:$('size').value,axisY:$('axisY').value,min:$('minAngle').value,max:$('maxAngle').value},
-    tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
-    volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
-    audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}
-  };
+  const cfg={body:$('bodyUrl').value,arrow:$('arrowUrl').value,knobs:$('knobsUrl').value,
+  arrow:{x:$('posX').value,y:$('posY').value,size:$('size').value,axisY:$('axisY').value,min:$('minAngle').value,max:$('maxAngle').value},
+  tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
+  volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
+  audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}};
   navigator.clipboard?.writeText(JSON.stringify(cfg,null,2)).then(()=>alert('Конфигурация скопирована!'));
 });
 
