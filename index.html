@@ -114,11 +114,11 @@
     <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
     <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
     <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
-    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
+    <div><label>Макс. значение</label><input type="number" id="maxX" value="180"></div>
   </div>
 
   <label>Тест положения: <span id="testLabel">56</span></label>
-  <input type="range" id="testRot" min="56" max="280" value="56">
+  <input type="range" id="testRot" min="56" max="180" value="56">
 
   <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
   <div class="grid">
@@ -249,7 +249,7 @@ function togglePower(){
     noiseAudio.play().catch(e => console.log('Audio blocked:', e));
     signalAudio.play().catch(e => console.log('Audio blocked:', e));
   } else {
-    ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
+    ind.textContent = 'aktivieren (LINKS!)';
     ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
