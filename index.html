@@ -20,7 +20,6 @@
 #FX_ROOT_RADIO #body { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 1; }
 #FX_ROOT_RADIO #arrow { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: top center; pointer-events: none; z-index: 2; }
 
-/* Интерактивные ручки */
 #FX_ROOT_RADIO .knob {
   position: absolute;
   border-radius: 50%;
@@ -29,24 +28,28 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #222;
-  border: 2px solid #555;
+  background-color: transparent;
   touch-action: none;
 }
-#FX_ROOT_RADIO .knob:active { cursor: grabbing; border-color: #ff0033; }
+#FX_ROOT_RADIO .knob:active { cursor: grabbing; }
 
-/* Визуальная засечка на ручке */
-#FX_ROOT_RADIO .knob::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 20%;
-  background: #ff0033;
-  border-radius: 2px;
+#FX_ROOT_RADIO .neon-glow-knob {
+  box-shadow: 0 0 10px #00e5ff, inset 0 0 5px #00e5ff;
 }
+
+#FX_ROOT_RADIO #power-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: bold;
+  background: #333;
+  color: #888;
+  border-radius: 3px;
+  z-index: 20;
+}
+#FX_ROOT_RADIO #power-indicator.on { background: #00c853; color: #fff; }
 
 #FX_ROOT_RADIO #status { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; background: rgba(0,0,0,.7); padding: 6px 12px; font-size: 11px; color: #888; display: flex; justify-content: space-between; }
 #FX_ROOT_RADIO #freq { color: #00e676; font-weight: bold; }
@@ -55,49 +58,58 @@
 <div class="rsg-panel">
   <h2>Мастер Радио</h2>
 
-  <label>URL Корпуса</label><input type="text" id="bodyUrl" value="">
-  <label>URL Стрелки</label><input type="text" id="arrowUrl" value="">
+  <label>URL Корпуса</label><input type="text" id="bodyUrl" value="https://img.genially.com/666ae277f4d3370">
+  <label>URL Стрелки</label><input type="text" id="arrowUrl" value="https://img.genially.com/666ae277f4d3370">
   <label>URL Ручек</label><input type="text" id="knobsUrl" value="">
 
-  <div class="section-title">1. Стрелка</div>
+  <div class="section-title">1. Калибровка стрелки</div>
   <div class="grid">
-    <div><label>X (%)</label><input type="number" id="posX" value="30" step=".1"></div>
-    <div><label>Y (%)</label><input type="number" id="posY" value="63" step=".1"></div>
-    <div><label>Ширина</label><input type="number" id="size" value="18"></div>
-    <div><label>Высота</label><input type="number" id="arrowHeight" value="45"></div>
-    <div><label>Мин X</label><input type="number" id="minX" value="30"></div>
-    <div><label>Макс X</label><input type="number" id="maxX" value="280"></div>
+    <div><label>Базовый X (%)</label><input type="number" id="posX" value="35.3" step=".1"></div>
+    <div><label>Базовый Y (%)</label><input type="number" id="posY" value="63" step=".1"></div>
+    <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
+    <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
+    <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
+    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
   </div>
 
-  <label>Тест положения: <span id="testLabel">30</span></label>
-  <input type="range" id="testRot" min="30" max="280" value="30">
+  <label>Тест положения: <span id="testLabel">56</span></label>
+  <input type="range" id="testRot" min="56" max="280" value="56">
 
-  <div class="section-title red">2. Левая ручка (Громкость)</div>
+  <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
   <div class="grid">
-    <div><label>X (%)</label><input type="number" id="knobSmallX" value="20" step=".1"></div>
-    <div><label>Y (%)</label><input type="number" id="knobSmallY" value="68" step=".1"></div>
+    <div><label>X (%)</label><input type="number" id="knobSmallX" value="31" step=".1"></div>
+    <div><label>Y (%)</label><input type="number" id="knobSmallY" value="64.2" step=".1"></div>
   </div>
-  <label>Размер (px)</label><input type="number" id="knobSmallSize" value="70">
+  <label>Размер (px)</label><input type="number" id="knobSmallSize" value="36">
 
-  <div class="section-title blue">3. Правая ручка (Частота)</div>
+  <div class="section-title blue">3. Правая ручка (Настройка частоты)</div>
   <div class="grid">
-    <div><label>X (%)</label><input type="number" id="knobBigX" value="80" step=".1"></div>
-    <div><label>Y (%)</label><input type="number" id="knobBigY" value="68" step=".1"></div>
+    <div><label>X (%)</label><input type="number" id="knobBigX" value="67.5" step=".1"></div>
+    <div><label>Y (%)</label><input type="number" id="knobBigY" value="64.1" step=".1"></div>
   </div>
-  <label>Размер (px)</label><input type="number" id="knobBigSize" value="70">
+  <label>Размер (px)</label><input type="number" id="knobBigSize" value="36">
+
+  <div class="section-title">4. Звуковые файлы (Прямые ссылки)</div>
+  <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="1.mp3">
+  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.mp3">
+  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
 </div>
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
+    <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
     <div id="body"></div>
     <div id="arrow"></div>
     <div id="volume" class="knob"></div>
     <div id="tuning" class="knob"></div>
     <div id="status">
-      <span>ЧАСТОТА: <b id="freq">30</b></span>
+      <span>ЧАСТОТА: <b id="freq">56</b></span>
     </div>
   </div>
 </div>
+
+<audio id="noiseAudio" loop preload="auto"></audio>
+<audio id="signalAudio" loop preload="auto"></audio>
 
 <script>
 (function(){
@@ -105,10 +117,14 @@
 const ROOT = document.getElementById('FX_ROOT_RADIO');
 const $ = id => ROOT.querySelector('#' + id);
 
-let currentPos = 30;
+let currentPos = 56;
 let tuningAngle = 0;
 let volumeAngle = 0;
 let activeDrag = null;
+let isPowerOn = false;
+
+const noiseAudio = $('noiseAudio');
+const signalAudio = $('signalAudio');
 
 function updateImages(){
   const b = $('bodyUrl').value.trim();
@@ -125,7 +141,7 @@ function updateImages(){
       el.style.border = 'none';
     } else {
       el.style.backgroundImage = 'none';
-      el.style.border = '2px solid #555';
+      el.style.border = '1px dashed #00e5ff';
     }
   });
 }
@@ -135,15 +151,13 @@ function updatePositions(){
   const W = box.clientWidth;
   const H = box.clientHeight;
 
-  // Позиционирование стрелки
   const ax = (parseFloat($('posX').value) / 100) * W;
   const ay = (parseFloat($('posY').value) / 100) * H;
   $('arrow').style.left = ax + 'px';
   $('arrow').style.top = ay + 'px';
-  $('arrow').style.width = (parseFloat($('size').value) || 18) + 'px';
+  $('arrow').style.width = (parseFloat($('size').value) || 27) + 'px';
   $('arrow').style.height = (parseFloat($('arrowHeight').value) || 45) + 'px';
 
-  // Позиционирование ручек
   setKnobLayout($('volume'), $('knobSmallX'), $('knobSmallY'), $('knobSmallSize'), W, H);
   setKnobLayout($('tuning'), $('knobBigX'), $('knobBigY'), $('knobBigSize'), W, H);
 
@@ -151,7 +165,7 @@ function updatePositions(){
 }
 
 function setKnobLayout(el, inputX, inputY, inputSize, W, H){
-  const s = parseFloat(inputSize.value) || 50;
+  const s = parseFloat(inputSize.value) || 36;
   const x = (parseFloat(inputX.value) / 100) * W - s / 2;
   const y = (parseFloat(inputY.value) / 100) * H - s / 2;
   el.style.left = x + 'px';
@@ -160,8 +174,45 @@ function setKnobLayout(el, inputX, inputY, inputSize, W, H){
   el.style.height = s + 'px';
 }
 
+function togglePower(){
+  isPowerOn = !isPowerOn;
+  const ind = $('power-indicator');
+  
+  if(isPowerOn){
+    ind.textContent = 'ВКЛ';
+    ind.classList.add('on');
+    noiseAudio.src = $('noiseFile').value.trim();
+    signalAudio.src = $('signalFile').value.trim();
+    
+    // Снятие блокировки Autoplay браузера
+    noiseAudio.play().catch(e => console.log('Ошибка воспроизведения трека 1:', e));
+    signalAudio.play().then(() => {
+      if(currentPos < parseFloat($('targetAngle').value)) signalAudio.pause();
+    }).catch(e => console.log('Ошибка воспроизведения трека 2:', e));
+  } else {
+    ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
+    ind.classList.remove('on');
+    noiseAudio.pause();
+    signalAudio.pause();
+  }
+  updateAudioLogic();
+}
+
+function updateAudioLogic(){
+  if(!isPowerOn) return;
+  const target = parseFloat($('targetAngle').value) || 230;
+
+  if(currentPos >= target){
+    noiseAudio.pause();
+    if(signalAudio.paused) signalAudio.play().catch(()=>{});
+  } else {
+    signalAudio.pause();
+    if(noiseAudio.paused) noiseAudio.play().catch(()=>{});
+  }
+}
+
 function render(){
-  const min = parseFloat($('minX').value) || 30;
+  const min = parseFloat($('minX').value) || 56;
   const max = parseFloat($('maxX').value) || 280;
   
   currentPos = Math.max(min, Math.min(max, currentPos));
@@ -180,9 +231,10 @@ function render(){
   $('testRot').value = currentPos;
   $('testLabel').textContent = Math.round(currentPos);
   $('freq').textContent = Math.round(currentPos);
+
+  updateAudioLogic();
 }
 
-// Обработка вращения мышь/тач
 function getAngle(e, el){
   const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -199,7 +251,7 @@ function startDrag(e, type){
     type: type,
     el: el,
     startAngle: getAngle(e, el),
-    initialKnobAngle: type === 'tuning' ? tuningAngle : volumeAngle
+    moved: false
   };
 }
 
@@ -213,6 +265,8 @@ function moveDrag(e){
   if (delta > 180) delta -= 360;
   if (delta < -180) delta += 360;
 
+  if(Math.abs(delta) > 2) activeDrag.moved = true;
+
   if(activeDrag.type === 'tuning'){
     tuningAngle += delta;
     activeDrag.startAngle = currentAngle;
@@ -225,7 +279,12 @@ function moveDrag(e){
   render();
 }
 
-function stopDrag(){ activeDrag = null; }
+function stopDrag(){ 
+  if(activeDrag && activeDrag.type === 'volume' && !activeDrag.moved){
+    togglePower();
+  }
+  activeDrag = null; 
+}
 
 $('tuning').addEventListener('mousedown', e => startDrag(e, 'tuning'));
 $('volume').addEventListener('mousedown', e => startDrag(e, 'volume'));
@@ -236,21 +295,6 @@ window.addEventListener('mousemove', moveDrag);
 window.addEventListener('touchmove', moveDrag, {passive: false});
 window.addEventListener('mouseup', stopDrag);
 window.addEventListener('touchend', stopDrag);
-
-// Колесо мыши для точности
-['tuning', 'volume'].forEach(id => {
-  $(id).addEventListener('wheel', e => {
-    e.preventDefault();
-    const dir = e.deltaY < 0 ? 5 : -5;
-    if(id === 'tuning'){
-      tuningAngle += dir * 2;
-      currentPos += dir;
-    } else {
-      volumeAngle += dir * 2;
-    }
-    render();
-  }, {passive: false});
-});
 
 ROOT.querySelectorAll('input').forEach(input => {
   input.addEventListener('input', () => { updateImages(); updatePositions(); });
