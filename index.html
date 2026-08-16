@@ -115,11 +115,11 @@
     <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
     <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
     <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
-    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
+    <div><label>Макс. значение</label><input type="number" id="maxX" value="180"></div>
   </div>
 
   <label>Тест положения: <span id="testLabel">56</span></label>
-  <input type="range" id="testRot" min="56" max="280" value="56">
+  <input type="range" id="testRot" min="56" max="180" value="56">
 
   <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
   <div class="grid">
@@ -140,7 +140,7 @@
   <input type="file" id="fileNoise" accept="audio/*">
   <label>Целевой трек 2</label>
   <input type="file" id="fileSignal" accept="audio/*">
-  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
+  <label>Порог переключения</label><input type="number" id="targetAngle" value="130">
 
   <div class="section-title">5. Настройки неонов</div>
   <label><input type="checkbox" id="neonArrow" checked>Неоновая подсветка стрелки</label>
@@ -152,13 +152,13 @@
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
-    <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
+    <div id="power-indicator">de/aktivieren (links)</div>
     <div id="body"></div>
     <div id="arrow" class="neon"></div>
     <div id="volume" class="knob neon"></div>
     <div id="tuning" class="knob neon"></div>
     <div id="status">
-      <span>ЧАСТОТА: <b id="freq">56</b></span>
+      <span>Frequenzen: <b id="freq">56</b></span>
     </div>
   </div>
 </div>
@@ -280,7 +280,7 @@ function togglePower(){
     noiseAudio.play().catch(e => console.log(e));
     signalAudio.play().catch(e => console.log(e));
   } else {
-    ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
+    ind.textContent = 'de/aktivieren (links)';
     ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
@@ -413,12 +413,12 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 <body>
 <div class="radio-container" id="mainContainer">
   <div class="radio" id="radio">
-    <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
+    <div id="power-indicator">de/aktivieren (links)</div>
     <div id="body"></div>
     <div id="arrow" class="${$('neonArrow').checked ? 'neon' : ''}"></div>
     <div id="volume" class="knob ${$('neonKnobs').checked ? 'neon' : ''}"></div>
     <div id="tuning" class="knob ${$('neonKnobs').checked ? 'neon' : ''}"></div>
-    <div id="status"><span>ЧАСТОТА: <b id="freq">${$('minX').value}</b></span></div>
+    <div id="status"><span>Frequenzen: <b id="freq">${$('minX').value}</b></span></div>
   </div>
 </div>
 <audio id="noiseAudio" loop preload="auto" src="${noiseDataUrl}"></audio>
@@ -441,12 +441,12 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     isPowerOn = !isPowerOn;
     const ind = document.getElementById('power-indicator');
     if(isPowerOn){ 
-      ind.textContent = 'ВКЛ'; 
+      ind.textContent = 'Hier'; 
       ind.classList.add('on'); 
       noiseAudio.play().catch(()=>{}); 
       signalAudio.play().catch(()=>{}); 
     } else { 
-      ind.textContent = 'ВЫКЛ (Кликните левую ручку)'; 
+      ind.textContent = 'de/aktivieren (links)'; 
       ind.classList.remove('on'); 
       noiseAudio.pause(); 
       signalAudio.pause(); 
