@@ -86,8 +86,6 @@
 
 <div class="section-title purple">6. Индикаторы</div>
 <div class="grid">
-<div><label>Кнопка X (%)</label><input type="number" data-id="btnX" value="20" step=".1"></div>
-<div><label>Кнопка Y (%)</label><input type="number" data-id="btnY" value="68" step=".1"></div>
 <div><label>LED X (%)</label><input type="number" data-id="ledX" value="20" step=".1"></div>
 <div><label>LED Y (%)</label><input type="number" data-id="ledY" value="60" step=".1"></div>
 </div>
@@ -170,9 +168,13 @@ function updateStyles(){
   box.style.background=transparent?'transparent':'#0a0a0a';
   box.style.backgroundImage=!transparent&&bg?`url("${bg}")`:'none';
 
-  const btnSize=parseFloat($('knobSmallSize').value)||70;
-  place($('power'),parseFloat($('btnX').value)/100*W-btnSize/2,parseFloat($('btnY').value)/100*H-btnSize/2,btnSize);
-  place($('led'),parseFloat($('ledX').value)/100*W-6,parseFloat($('ledY').value)/100*H-6,12);
+  // Питание строго синхронизировано с левой ручкой
+  const btnSize = Math.max(20, parseFloat($('knobSmallSize').value) || 70);
+  const btnX = parseFloat($('knobSmallX').value) || 20;
+  const btnY = parseFloat($('knobSmallY').value) || 68;
+
+  place($('power'), btnX/100*W - btnSize/2, btnY/100*H - btnSize/2, btnSize);
+  place($('led'), parseFloat($('ledX').value)/100*W-6, parseFloat($('ledY').value)/100*H-6, 12);
 
   render();
 }
@@ -188,7 +190,6 @@ function render(){
   const mn=minX(), mx=maxX();
   currentPos=clamp(currentPos, mn, mx);
   
-  // Прямолинейный сдвиг в пикселях без поворотов
   const travelPx=(mx-mn)/300*W; 
   const ratio=(currentPos-mn)/(mx-mn||1);
   const shiftX=ratio*travelPx;
