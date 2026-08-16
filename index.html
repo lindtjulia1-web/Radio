@@ -7,7 +7,6 @@
 #FX_ROOT_RADIO label { display: block; font-size: 10px; font-weight: bold; margin: 4px 0 2px; color: #8a8a8a; text-transform: uppercase; }
 #FX_ROOT_RADIO input[type=text], #FX_ROOT_RADIO input[type=number] { width: 100%; background: #000; border: 1px solid #2c2c2c; color: #fff; padding: 4px 6px; margin-bottom: 4px; border-radius: 3px; font-size: 11px; }
 #FX_ROOT_RADIO input:focus { border-color: #ff0033; outline: none; }
-#FX_ROOT_RADIO input[type=checkbox] { margin: 0 6px 0 0; cursor: pointer; }
 #FX_ROOT_RADIO input[type=range] { width: 100%; accent-color: #ff0033; margin-bottom: 6px; }
 #FX_ROOT_RADIO .section-title { color: #ffcc00; font-size: 10px; text-transform: uppercase; font-weight: bold; margin: 10px 0 4px; border-top: 1px solid #222; padding-top: 6px; }
 #FX_ROOT_RADIO .red { color: #ff3333; }
@@ -28,13 +27,20 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: transparent;
   touch-action: none;
 }
 #FX_ROOT_RADIO .knob:active { cursor: grabbing; }
 
-#FX_ROOT_RADIO .neon-glow-knob {
-  box-shadow: 0 0 10px #00e5ff, inset 0 0 5px #00e5ff;
+#FX_ROOT_RADIO .knob-fallback::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 25%;
+  background: #ff0033;
+  border-radius: 2px;
 }
 
 #FX_ROOT_RADIO #power-indicator {
@@ -58,52 +64,51 @@
 <div class="rsg-panel">
   <h2>Мастер Радио</h2>
 
-  <label>URL Корпуса</label><input type="text" id="bodyUrl" value="https://img.genially.com/666ae277f4d3370">
-  <label>URL Стрелки</label><input type="text" id="arrowUrl" value="https://img.genially.com/666ae277f4d3370">
+  <label>URL Корпуса</label><input type="text" id="bodyUrl" value="https://img.genially.com/666ae277f4d337001">
+  <label>URL Стрелки</label><input type="text" id="arrowUrl" value="https://img.genially.com/666ae277f4d337001">
   <label>URL Ручек</label><input type="text" id="knobsUrl" value="">
 
-  <div class="section-title">1. Калибровка стрелки</div>
+  <div class="section-title">1. Настройка шкалы стрелки</div>
   <div class="grid">
-    <div><label>Базовый X (%)</label><input type="number" id="posX" value="35.3" step=".1"></div>
-    <div><label>Базовый Y (%)</label><input type="number" id="posY" value="63" step=".1"></div>
-    <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
+    <div><label>Y Положение (%)</label><input type="number" id="posY" value="63" step=".1"></div>
+    <div><label>Ширина (px)</label><input type="number" id="size" value="18"></div>
     <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
-    <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
-    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
+    <div><label>Порог Трека 2 (%)</label><input type="number" id="targetAngle" value="70"></div>
+    <div><label>Мин X (%)</label><input type="number" id="minX" value="35"></div>
+    <div><label>Макс X (%)</label><input type="number" id="maxX" value="65"></div>
   </div>
 
-  <label>Тест положения: <span id="testLabel">56</span></label>
-  <input type="range" id="testRot" min="56" max="280" value="56">
+  <label>Тест положения стрелки (%)</label>
+  <input type="range" id="testRot" min="35" max="65" value="35">
 
-  <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
+  <div class="section-title red">2. Левая ручка (ВКЛ / ВЫКЛ)</div>
   <div class="grid">
     <div><label>X (%)</label><input type="number" id="knobSmallX" value="31" step=".1"></div>
     <div><label>Y (%)</label><input type="number" id="knobSmallY" value="64.2" step=".1"></div>
   </div>
   <label>Размер (px)</label><input type="number" id="knobSmallSize" value="36">
 
-  <div class="section-title blue">3. Правая ручка (Настройка частоты)</div>
+  <div class="section-title blue">3. Правая ручка (Вращение стрелки)</div>
   <div class="grid">
     <div><label>X (%)</label><input type="number" id="knobBigX" value="67.5" step=".1"></div>
     <div><label>Y (%)</label><input type="number" id="knobBigY" value="64.1" step=".1"></div>
   </div>
   <label>Размер (px)</label><input type="number" id="knobBigSize" value="36">
 
-  <div class="section-title">4. Звуковые файлы (Прямые ссылки)</div>
-  <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="1.mp3">
-  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.mp3">
-  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
+  <div class="section-title">4. Звуковые файлы</div>
+  <label>Фоновый Трек 1 (Шум)</label><input type="text" id="noiseFile" value="1.mp3">
+  <label>Целевой Трек 2 (Радио)</label><input type="text" id="signalFile" value="2.mp3">
 </div>
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
-    <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
+    <div id="power-indicator">ВЫКЛ (Клик по левой ручке)</div>
     <div id="body"></div>
     <div id="arrow"></div>
     <div id="volume" class="knob"></div>
     <div id="tuning" class="knob"></div>
     <div id="status">
-      <span>ЧАСТОТА: <b id="freq">56</b></span>
+      <span>ПОЛОЖЕНИЕ СТРЕЛКИ: <b id="freq">35%</b></span>
     </div>
   </div>
 </div>
@@ -117,7 +122,7 @@
 const ROOT = document.getElementById('FX_ROOT_RADIO');
 const $ = id => ROOT.querySelector('#' + id);
 
-let currentPos = 56;
+let currentPercent = 35; 
 let tuningAngle = 0;
 let volumeAngle = 0;
 let activeDrag = null;
@@ -138,10 +143,14 @@ function updateImages(){
     const el = $(id);
     if(k) {
       el.style.backgroundImage = `url("${k}")`;
+      el.style.backgroundColor = 'transparent';
       el.style.border = 'none';
+      el.classList.remove('knob-fallback');
     } else {
       el.style.backgroundImage = 'none';
+      el.style.backgroundColor = 'rgba(0,0,0,0.4)';
       el.style.border = '1px dashed #00e5ff';
+      el.classList.add('knob-fallback');
     }
   });
 }
@@ -151,12 +160,20 @@ function updatePositions(){
   const W = box.clientWidth;
   const H = box.clientHeight;
 
-  const ax = (parseFloat($('posX').value) / 100) * W;
+  const minX = parseFloat($('minX').value) || 0;
+  const maxX = parseFloat($('maxX').value) || 100;
+
+  currentPercent = Math.max(minX, Math.min(maxX, currentPercent));
+
+  const ax = (currentPercent / 100) * W;
   const ay = (parseFloat($('posY').value) / 100) * H;
-  $('arrow').style.left = ax + 'px';
+  const aw = parseFloat($('size').value) || 18;
+  const ah = parseFloat($('arrowHeight').value) || 45;
+
+  $('arrow').style.left = (ax - aw/2) + 'px';
   $('arrow').style.top = ay + 'px';
-  $('arrow').style.width = (parseFloat($('size').value) || 27) + 'px';
-  $('arrow').style.height = (parseFloat($('arrowHeight').value) || 45) + 'px';
+  $('arrow').style.width = aw + 'px';
+  $('arrow').style.height = ah + 'px';
 
   setKnobLayout($('volume'), $('knobSmallX'), $('knobSmallY'), $('knobSmallSize'), W, H);
   setKnobLayout($('tuning'), $('knobBigX'), $('knobBigY'), $('knobBigSize'), W, H);
@@ -184,13 +201,12 @@ function togglePower(){
     noiseAudio.src = $('noiseFile').value.trim();
     signalAudio.src = $('signalFile').value.trim();
     
-    // Снятие блокировки Autoplay браузера
-    noiseAudio.play().catch(e => console.log('Ошибка воспроизведения трека 1:', e));
+    noiseAudio.play().catch(()=>{});
     signalAudio.play().then(() => {
-      if(currentPos < parseFloat($('targetAngle').value)) signalAudio.pause();
-    }).catch(e => console.log('Ошибка воспроизведения трека 2:', e));
+      if(currentPercent < parseFloat($('targetAngle').value)) signalAudio.pause();
+    }).catch(()=>{});
   } else {
-    ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
+    ind.textContent = 'ВЫКЛ (Клик по левой ручке)';
     ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
@@ -200,9 +216,9 @@ function togglePower(){
 
 function updateAudioLogic(){
   if(!isPowerOn) return;
-  const target = parseFloat($('targetAngle').value) || 230;
+  const target = parseFloat($('targetAngle').value) || 70;
 
-  if(currentPos >= target){
+  if(currentPercent >= target){
     noiseAudio.pause();
     if(signalAudio.paused) signalAudio.play().catch(()=>{});
   } else {
@@ -212,25 +228,23 @@ function updateAudioLogic(){
 }
 
 function render(){
-  const min = parseFloat($('minX').value) || 56;
-  const max = parseFloat($('maxX').value) || 280;
+  const minX = parseFloat($('minX').value) || 0;
+  const maxX = parseFloat($('maxX').value) || 100;
   
-  currentPos = Math.max(min, Math.min(max, currentPos));
+  currentPercent = Math.max(minX, Math.min(maxX, currentPercent));
 
   const W = $('radio').clientWidth;
-  const travelPx = ((max - min) / 300) * W;
-  const ratio = (currentPos - min) / (max - min || 1);
-  const shiftX = ratio * travelPx;
+  const ax = (currentPercent / 100) * W;
+  const aw = parseFloat($('size').value) || 18;
 
-  $('arrow').style.transform = `translateX(${shiftX}px)`;
+  $('arrow').style.left = (ax - aw/2) + 'px';
   $('tuning').style.transform = `rotate(${tuningAngle}deg)`;
   $('volume').style.transform = `rotate(${volumeAngle}deg)`;
 
-  $('testRot').min = min;
-  $('testRot').max = max;
-  $('testRot').value = currentPos;
-  $('testLabel').textContent = Math.round(currentPos);
-  $('freq').textContent = Math.round(currentPos);
+  $('testRot').min = minX;
+  $('testRot').max = maxX;
+  $('testRot').value = currentPercent;
+  $('freq').textContent = Math.round(currentPercent) + '%';
 
   updateAudioLogic();
 }
@@ -265,12 +279,12 @@ function moveDrag(e){
   if (delta > 180) delta -= 360;
   if (delta < -180) delta += 360;
 
-  if(Math.abs(delta) > 2) activeDrag.moved = true;
+  if(Math.abs(delta) > 1) activeDrag.moved = true;
 
   if(activeDrag.type === 'tuning'){
     tuningAngle += delta;
     activeDrag.startAngle = currentAngle;
-    currentPos += delta * 0.4;
+    currentPercent += delta * 0.15; 
   } else {
     volumeAngle += delta;
     activeDrag.startAngle = currentAngle;
@@ -295,6 +309,11 @@ window.addEventListener('mousemove', moveDrag);
 window.addEventListener('touchmove', moveDrag, {passive: false});
 window.addEventListener('mouseup', stopDrag);
 window.addEventListener('touchend', stopDrag);
+
+$('testRot').addEventListener('input', e => {
+  currentPercent = parseFloat(e.target.value);
+  render();
+});
 
 ROOT.querySelectorAll('input').forEach(input => {
   input.addEventListener('input', () => { updateImages(); updatePositions(); });
