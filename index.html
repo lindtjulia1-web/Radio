@@ -21,7 +21,7 @@
 #FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform}
 #FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:4;cursor:grab;pointer-events:auto;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none}
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
-#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555}
+#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555;user-select:none}
 #FX_ROOT_RADIO #power.on{background:#0f2a0f;border-color:#00c853;color:#00c853}
 #FX_ROOT_RADIO #led{position:absolute;border-radius:50%;z-index:5;background:#1a1a1a;border:1px solid #333;pointer-events:none}
 #FX_ROOT_RADIO #led.on{background:#00e676;box-shadow:0 0 10px #00e676}
@@ -46,37 +46,37 @@
 <label>Изображение ручек (URL)</label>
 <input type="text" data-id="knobsUrl" value="3.png">
 
-<div class="section-title">1. Калибровка стрелки шкалы</div>
+<div class="section-title">1. Калибровка линейной стрелки</div>
 <div class="grid">
-<div><label>X (%)</label><input type="number" data-id="posX" value="73.7" step=".1"></div>
-<div><label>Y (%)</label><input type="number" data-id="posY" value="43" step=".1"></div>
-<div><label>Размер (px)</label><input type="number" data-id="size" value="33"></div>
-<div><label>Ось вращения Y (px)</label><input type="number" data-id="axisY" value="103"></div>
-<div><label>Мин. угол (°)</label><input type="number" data-id="minAngle" value="-30"></div>
-<div><label>Макс. угол (°)</label><input type="number" data-id="maxAngle" value="15"></div>
+<div><label>Базовый X (%)</label><input type="number" data-id="posX" value="30" step=".1"></div>
+<div><label>Базовый Y (%)</label><input type="number" data-id="posY" value="63" step=".1"></div>
+<div><label>Ширина (px)</label><input type="number" data-id="size" value="18"></div>
+<div><label>Высота (px)</label><input type="number" data-id="arrowHeight" value="45"></div>
+<div><label>Мин. значение (30)</label><input type="number" data-id="minX" value="30"></div>
+<div><label>Макс. значение (280)</label><input type="number" data-id="maxX" value="280"></div>
 </div>
 
-<label>Тест поворота стрелки: <span data-id="testLabel">0°</span></label>
-<input type="range" data-id="testRot" min="-30" max="15" value="0">
+<label>Тест положения стрелки: <span data-id="testLabel">30</span></label>
+<input type="range" data-id="testRot" min="30" max="280" value="30">
 
-<div class="section-title red">2. Ручка настройки (большая)</div>
+<div class="section-title red">2. Левая ручка (Включение / Трек 1)</div>
 <div class="grid">
-<div><label>X (%)</label><input type="number" data-id="knobBigX" value="73" step=".1"></div>
-<div><label>Y (%)</label><input type="number" data-id="knobBigY" value="59" step=".1"></div>
+<div><label>X (%)</label><input type="number" data-id="knobSmallX" value="20" step=".1"></div>
+<div><label>Y (%)</label><input type="number" data-id="knobSmallY" value="68" step=".1"></div>
 </div>
-<label>Размер big (px)</label><input type="number" data-id="knobBigSize" value="109">
+<label>Размер (px)</label><input type="number" data-id="knobSmallSize" value="70">
 
-<div class="section-title blue">3. Ручка звука (маленькая)</div>
+<div class="section-title blue">3. Правая ручка (Настройка частоты)</div>
 <div class="grid">
-<div><label>X (%)</label><input type="number" data-id="knobSmallX" value="11" step=".1"></div>
-<div><label>Y (%)</label><input type="number" data-id="knobSmallY" value="66" step=".1"></div>
+<div><label>X (%)</label><input type="number" data-id="knobBigX" value="80" step=".1"></div>
+<div><label>Y (%)</label><input type="number" data-id="knobBigY" value="68" step=".1"></div>
 </div>
-<label>Размер small (px)</label><input type="number" data-id="knobSmallSize" value="50">
+<label>Размер (px)</label><input type="number" data-id="knobBigSize" value="70">
 
 <div class="section-title">4. Звуковые файлы</div>
-<label>Шум (mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
-<label>Сигнал (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
-<label>Целевой угол стрелки (°)</label><input type="number" data-id="targetAngle" value="0" step=".1">
+<label>Фоновый фоновый Трек 1 (mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
+<label>Целевой Трек 2 (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
+<label>Целевое значение для Трека 2</label><input type="number" data-id="targetAngle" value="280" step="1">
 
 <div class="section-title green">5. Настройки фона</div>
 <label style="display:flex;align-items:center;text-transform:none;color:#aaa">
@@ -84,12 +84,12 @@
 </label>
 <label>URL кастомного фона</label><input type="text" data-id="customBgUrl" placeholder="https://...">
 
-<div class="section-title purple">6. Питание</div>
+<div class="section-title purple">6. Индикаторы</div>
 <div class="grid">
-<div><label>Кнопка X (%)</label><input type="number" data-id="btnX" value="21.1" step=".1"></div>
-<div><label>Кнопка Y (%)</label><input type="number" data-id="btnY" value="65.6" step=".1"></div>
-<div><label>LED X (%)</label><input type="number" data-id="ledX" value="21.2" step=".1"></div>
-<div><label>LED Y (%)</label><input type="number" data-id="ledY" value="60.8" step=".1"></div>
+<div><label>Кнопка X (%)</label><input type="number" data-id="btnX" value="20" step=".1"></div>
+<div><label>Кнопка Y (%)</label><input type="number" data-id="btnY" value="68" step=".1"></div>
+<div><label>LED X (%)</label><input type="number" data-id="ledX" value="20" step=".1"></div>
+<div><label>LED Y (%)</label><input type="number" data-id="ledY" value="60" step=".1"></div>
 </div>
 
 <div class="buttons">
@@ -102,20 +102,20 @@
 <div class="radio" data-id="radio">
 <div id="body"></div>
 <div id="arrow"></div>
-<div id="tuning" class="knob"></div>
 <div id="volume" class="knob"></div>
+<div id="tuning" class="knob"></div>
 <div id="power">⏻</div>
 <div id="led"></div>
 <div id="status">
-<span id="freq">— MHz</span>
+<span id="freq">30</span>
 <span class="bars"><i class="sbar" style="height:5px"></i><i class="sbar" style="height:8px"></i><i class="sbar" style="height:11px"></i><i class="sbar" style="height:14px"></i><i class="sbar" style="height:16px"></i></span>
 </div>
-<div id="success"><b>СИГНАЛ НАЙДЕН!</b>Радиосвязь установлена.</div>
+<div id="success"><b>СИГНАЛ НАЙДЕН!</b>Играет Трек 2.</div>
 </div>
 </div>
 
-<audio data-id="noiseAudio" loop></audio>
-<audio data-id="signalAudio" loop></audio>
+<audio id="noiseAudio" loop></audio>
+<audio id="signalAudio" loop></audio>
 
 <script>
 (function(){
@@ -126,18 +126,17 @@ if(!ROOT || ROOT.dataset.ready==='1') return;
 ROOT.dataset.ready='1';
 
 const $=id=>ROOT.querySelector('[data-id="'+id+'"]')||ROOT.querySelector('#'+id);
-const min=()=>parseFloat($('minAngle').value)||-30;
-const max=()=>parseFloat($('maxAngle').value)||15;
-const target=()=>parseFloat($('targetAngle').value)||0;
+const minX=()=>parseFloat($('minX').value)||30;
+const maxX=()=>parseFloat($('maxX').value)||280;
+const target=()=>parseFloat($('targetAngle').value)||280;
 
+let currentPos=30;
 let tuningAngle=0;
-let volumeAngle=-140;
+let volumeAngle=0;
 let powerOn=false;
 let drag=null;
 let solved=false;
 
-const FREQ_MIN=87.5,FREQ_MAX=108;
-const STATIONS=[89.1,91.5,93.7,96.2,99.8,102.1,104.5,107.0];
 const bars=[...ROOT.querySelectorAll('.sbar')];
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
@@ -153,16 +152,15 @@ function updateStyles(){
   const box=$('radio'),W=box.clientWidth,H=box.clientHeight;
   const ax=parseFloat($('posX').value)/100*W;
   const ay=parseFloat($('posY').value)/100*H;
-  const aw=parseFloat($('size').value)||33;
-  const pivot=parseFloat($('axisY').value)||103;
+  const aw=parseFloat($('size').value)||18;
+  const ah=parseFloat($('arrowHeight').value)||45;
 
   Object.assign($('arrow').style,{
-    left:ax+'px',top:ay+'px',width:aw+'px',height:(pivot+aw)+'px',
-    transformOrigin:`50% ${pivot}px`
+    left:ax+'px',top:ay+'px',width:aw+'px',height:ah+'px'
   });
 
-  $('testRot').min=min(); $('testRot').max=max();
-  $('testRot').value=clamp(parseFloat($('testRot').value)||0,min(),max());
+  $('testRot').min=minX(); $('testRot').max=maxX();
+  $('testRot').value=clamp(currentPos,minX(),maxX());
 
   setKnob('tuning',$('knobBigX'),$('knobBigY'),$('knobBigSize'),W,H);
   setKnob('volume',$('knobSmallX'),$('knobSmallY'),$('knobSmallSize'),W,H);
@@ -175,7 +173,6 @@ function updateStyles(){
   place($('power'),parseFloat($('btnX').value)/100*W-15,parseFloat($('btnY').value)/100*H-15,30);
   place($('led'),parseFloat($('ledX').value)/100*W-6,parseFloat($('ledY').value)/100*H-6,12);
 
-  tuningAngle=clamp(tuningAngle,-135,135);
   render();
 }
 
@@ -185,74 +182,51 @@ function setKnob(el,x,y,size,W,H){
 }
 function place(el,x,y,w){el.style.left=x+'px';el.style.top=y+'px';el.style.width=w+'px';el.style.height=w+'px';}
 
-function tuningToArrow(){
-  const t=clamp(tuningAngle,-135,135);
-  const ratio=(t+135)/270;
-  return min()+ratio*(max()-min());
-}
-
-function arrowToFrequency(a){
-  const r=(a-min())/(max()-min()||1);
-  return FREQ_MIN+clamp(r,0,1)*(FREQ_MAX-FREQ_MIN);
-}
-
 function render(){
-  const a=tuningToArrow();
-  $('arrow').style.transform=`rotate(${a.toFixed(2)}deg)`;
+  const box=$('radio'),W=box.clientWidth;
+  const mn=minX(), mx=maxX();
+  currentPos=clamp(currentPos, mn, mx);
+  
+  // Прямолинейный сдвиг в пикселях без поворотов
+  const travelPx=(mx-mn)/300*W; 
+  const ratio=(currentPos-mn)/(mx-mn||1);
+  const shiftX=ratio*travelPx;
+
+  $('arrow').style.transform=`translateX(${shiftX.toFixed(2)}px)`;
   $('tuning').style.transform=`rotate(${tuningAngle}deg)`;
   $('volume').style.transform=`rotate(${volumeAngle}deg)`;
-  $('testRot').value=clamp(a,min(),max());
-  $('testLabel').textContent=a.toFixed(1)+'°';
+  $('testRot').value=currentPos;
+  $('testLabel').textContent=Math.round(currentPos);
 
-  const f=arrowToFrequency(a);
-  $('freq').textContent=f.toFixed(1)+' MHz';
-  updateBars(f);
-  updateAudio(a);
+  $('freq').textContent=Math.round(currentPos);
+  updateBars(currentPos);
+  updateAudio(currentPos);
 }
 
-function updateBars(freq){
-  let strength=0;
-  for(const s of STATIONS){
-    const d=Math.abs(freq-s);
-    if(d<0.7) strength=Math.max(strength,1-d/0.7);
-  }
+function updateBars(pos){
+  const d=Math.abs(pos-target());
+  const maxD=maxX()-minX();
+  const strength=Math.max(0,1-d/(maxD*0.1));
   const level=Math.round(strength*5);
   bars.forEach((b,i)=>b.classList.toggle('active',i<level));
 }
 
-function masterVolume(){return clamp((volumeAngle+140)/280,0,1);}
-
-function updateAudio(a){
+function updateAudio(pos){
   if(!powerOn)return;
   const noise=$('noiseAudio'),signal=$('signalAudio');
-  const d=Math.abs(a-target()),range=8;
-  const mv=masterVolume();
+  const d=Math.abs(pos-target());
+  const tolerance=10;
 
-  if(d<=range){
-    const sig=Math.pow(1-d/range,2);
-    noise._baseVolume=(1-sig)*0.6;
-    signal._baseVolume=sig;
-    signal.volume=sig*mv;
-    noise.volume=(1-sig)*0.6*mv;
-    if(sig>0.02 && signal.paused)signal.play().catch(()=>{});
-    if(d<=parseFloat($('testRot').step)||d<=0.8)win();
+  if(d<=tolerance){
+    const sig=Math.pow(1-d/tolerance,2);
+    noise.volume=(1-sig);
+    signal.volume=sig;
+    if(sig>0.05 && signal.paused)signal.play().catch(()=>{});
+    if(d<=2)win();
   }else{
     signal.pause(); signal.volume=0;
-    noise._baseVolume=0.6; noise.volume=0.6*mv;
+    noise.volume=1;
   }
-}
-
-function updateVolume(){
-  if(!powerOn)return;
-  const mv=masterVolume(),noise=$('noiseAudio'),signal=$('signalAudio');
-  noise.volume=(noise._baseVolume??0.6)*mv;
-  signal.volume=(signal._baseVolume??0)*mv;
-}
-
-function win(){
-  if(solved)return;
-  solved=true;
-  $('success').classList.add('show');
 }
 
 function togglePower(){
@@ -264,8 +238,7 @@ function togglePower(){
   if(powerOn){
     n.src=$('noiseFile').value.trim();
     s.src=$('signalFile').value.trim();
-    n._baseVolume=0.6;s._baseVolume=0;
-    n.volume=0.6*masterVolume();s.volume=0;
+    n.volume=1; s.volume=0;
     n.play().catch(()=>{});
     render();
   }else{
@@ -275,8 +248,8 @@ function togglePower(){
 
 function pointerAngle(e,el){
   const r=el.getBoundingClientRect();
-  const x=e.clientX??e.touches[0].clientX;
-  const y=e.clientY??e.touches[0].clientY;
+  const x=e.clientX??e.touches?.[0]?.clientX??0;
+  const y=e.clientY??e.touches?.[0]?.clientY??0;
   return Math.atan2(y-(r.top+r.height/2),x-(r.left+r.width/2))*180/Math.PI;
 }
 
@@ -295,14 +268,23 @@ function moveDrag(e){
   if(d>180)d-=360;if(d<-180)d+=360;
 
   if(drag.type==='tuning'){
-    tuningAngle=clamp(drag.angle+d,-135,135);
+    tuningAngle+=d;
+    drag.start=pointerAngle(e,el);
+    currentPos=clamp(currentPos+d*0.3, minX(), maxX());
   }else{
-    volumeAngle=clamp(drag.angle+d,-140,140);
+    volumeAngle+=d;
+    drag.start=pointerAngle(e,el);
   }
-  render();updateVolume();
+  render();
 }
 
 function endDrag(){drag=null;}
+
+function win(){
+  if(solved)return;
+  solved=true;
+  $('success').classList.add('show');
+}
 
 ['tuning','volume'].forEach(type=>{
   const el=$(type);
@@ -312,19 +294,22 @@ function endDrag(){drag=null;}
   el.addEventListener('pointercancel',endDrag);
   el.addEventListener('wheel',e=>{
     e.preventDefault();
-    const step=type==='tuning'?3:5;
-    if(type==='tuning')tuningAngle=clamp(tuningAngle+(e.deltaY<0?step:-step),-135,135);
-    else volumeAngle=clamp(volumeAngle+(e.deltaY<0?step:-step),-140,140);
-    render();updateVolume();
+    const step=e.deltaY<0?4:-4;
+    if(type==='tuning'){
+      tuningAngle+=step*5;
+      currentPos=clamp(currentPos+step, minX(), maxX());
+    }else{
+      volumeAngle+=step*5;
+    }
+    render();
   },{passive:false});
 });
 
 $('power').addEventListener('click',togglePower);
+$('volume').addEventListener('click',togglePower);
 
 $('testRot').addEventListener('input',()=>{
-  const a=parseFloat($('testRot').value);
-  const ratio=(a-min())/(max()-min()||1);
-  tuningAngle=-135+clamp(ratio,0,1)*270;
+  currentPos=parseFloat($('testRot').value);
   render();
 });
 
@@ -338,11 +323,13 @@ $('signalFile').addEventListener('change',()=>{if(powerOn)$('signalAudio').src=$
 
 ROOT.querySelector('[data-action="update"]').addEventListener('click',()=>{updateImages();updateStyles();});
 ROOT.querySelector('[data-action="copy"]').addEventListener('click',()=>{
-  const cfg={body:$('bodyUrl').value,arrow:$('arrowUrl').value,knobs:$('knobsUrl').value,
-  arrow:{x:$('posX').value,y:$('posY').value,size:$('size').value,axisY:$('axisY').value,min:$('minAngle').value,max:$('maxAngle').value},
-  tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
-  volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
-  audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}};
+  const cfg={
+    body:$('bodyUrl').value,arrow:$('arrowUrl').value,knobs:$('knobsUrl').value,
+    arrowParams:{x:$('posX').value,y:$('posY').value,size:$('size').value,height:$('arrowHeight').value,minX:$('minX').value,maxX:$('maxX').value},
+    tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
+    volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
+    audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}
+  };
   navigator.clipboard?.writeText(JSON.stringify(cfg,null,2)).then(()=>alert('Конфигурация скопирована!'));
 });
 
