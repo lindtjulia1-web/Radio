@@ -18,8 +18,8 @@
 #FX_ROOT_RADIO .rsg-viewport{flex:1;display:flex;justify-content:center;align-items:center;background:#050505;position:relative;min-width:0}
 #FX_ROOT_RADIO .radio{position:relative;width:min(600px,90%);aspect-ratio:3/2;background:#0a0a0a;border:1px dashed #2c2c2c;overflow:hidden}
 #FX_ROOT_RADIO #body{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;pointer-events:none;z-index:1}
-#FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform}
-#FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:20;cursor:grab;pointer-events:auto !important;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none}
+#FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform;transition:filter .3s ease}
+#FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:20;cursor:grab;pointer-events:auto !important;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none;transition:box-shadow .3s ease, filter .3s ease}
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
 #FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:25;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;background:transparent;border:none;user-select:none;pointer-events:auto !important}
 #FX_ROOT_RADIO #power.on{color:#00c853;text-shadow:0 0 5px #00c853}
@@ -31,6 +31,16 @@
 #FX_ROOT_RADIO #success{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;pointer-events:none;background:rgba(0,0,0,.94);border:2px solid #ffcc00;border-radius:14px;padding:22px 32px;text-align:center;box-shadow:0 0 35px rgba(255,204,0,.35);transition:.3s}
 #FX_ROOT_RADIO #success.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #FX_ROOT_RADIO #success b{display:block;color:#ffcc00;font-size:24px;margin-bottom:7px}
+
+/* Эффекты неонового свечения */
+#FX_ROOT_RADIO .neon-glow-arrow {
+  filter: drop-shadow(0 0 2px #ff0055) drop-shadow(0 0 6px #ff0055) drop-shadow(0 0 12px #ff3300);
+}
+#FX_ROOT_RADIO .neon-glow-knob {
+  box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff, inset 0 0 10px #00e5ff;
+  filter: drop-shadow(0 0 5px #00e5ff);
+}
+
 @media(max-width:800px){#FX_ROOT_RADIO .rsg-panel{width:290px;flex-basis:290px;padding:12px}}
 </style>
 
@@ -78,9 +88,15 @@
 <label>Целевой Трек 2 (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
 <label>Целевое значение для Трека 2</label><input type="number" data-id="targetAngle" value="280" step="1">
 
-<div class="section-title green">5. Настройки фона</div>
+<div class="section-title green">5. Настройки фона и неонов</div>
 <label style="display:flex;align-items:center;text-transform:none;color:#aaa">
 <input type="checkbox" data-id="transparentBg">Прозрачный фон
+</label>
+<label style="display:flex;align-items:center;text-transform:none;color:#ff3366">
+<input type="checkbox" data-id="neonArrow" checked>Неоновая подсветка стрелки
+</label>
+<label style="display:flex;align-items:center;text-transform:none;color:#00e5ff">
+<input type="checkbox" data-id="neonKnobs" checked>Неоновая подсветка кнопок
 </label>
 <label>URL кастомного фона</label><input type="text" data-id="customBgUrl" placeholder="https://...">
 
@@ -156,6 +172,12 @@ function updateStyles(){
   Object.assign($('arrow').style,{
     left:ax+'px',top:ay+'px',width:aw+'px',height:ah+'px'
   });
+
+  // Управление неоновой подсветкой
+  $('arrow').classList.toggle('neon-glow-arrow', $('neonArrow').checked);
+  const isNeonKnobs = $('neonKnobs').checked;
+  $('tuning').classList.toggle('neon-glow-knob', isNeonKnobs);
+  $('volume').classList.toggle('neon-glow-knob', isNeonKnobs);
 
   $('testRot').min=minX(); $('testRot').max=maxX();
   $('testRot').value=clamp(currentPos,minX(),maxX());
@@ -342,7 +364,8 @@ ROOT.querySelector('[data-action="copy"]').addEventListener('click',()=>{
     arrowParams:{x:$('posX').value,y:$('posY').value,size:$('size').value,height:$('arrowHeight').value,minX:$('minX').value,maxX:$('maxX').value},
     tuning:{x:$('knobBigX').value,y:$('knobBigY').value,size:$('knobBigSize').value},
     volume:{x:$('knobSmallX').value,y:$('knobSmallY').value,size:$('knobSmallSize').value},
-    audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value}
+    audio:{noise:$('noiseFile').value,signal:$('signalFile').value,target:$('targetAngle').value},
+    neon:{arrow:$('neonArrow').checked,knobs:$('neonKnobs').checked}
   };
   navigator.clipboard?.writeText(JSON.stringify(cfg,null,2)).then(()=>alert('Конфигурация скопирована!'));
 });
