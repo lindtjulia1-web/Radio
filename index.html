@@ -83,20 +83,6 @@
   border: 1px solid #00e5ff !important;
 }
 
-#FX_ROOT_RADIO #power-indicator {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 8px;
-  font-size: 10px;
-  font-weight: bold;
-  background: rgba(0,0,0,0.6);
-  color: #888;
-  border-radius: 3px;
-  z-index: 20;
-}
-#FX_ROOT_RADIO #power-indicator.on { background: #00c853; color: #fff; }
-
 #FX_ROOT_RADIO #status { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; background: rgba(0,0,0,.4); padding: 6px 12px; font-size: 11px; color: #888; display: flex; justify-content: space-between; border-radius: 4px; }
 #FX_ROOT_RADIO #freq { color: #00e676; font-weight: bold; }
 </style>
@@ -115,13 +101,13 @@
     <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
     <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
     <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
-    <div><label>Макс. значение</label><input type="number" id="maxX" value="180"></div>
+    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
   </div>
 
   <label>Тест положения: <span id="testLabel">56</span></label>
-  <input type="range" id="testRot" min="56" max="180" value="56">
+  <input type="range" id="testRot" min="56" max="280" value="56">
 
-  <div class="section-title red">2. Левая ручка (ein-aus / Трек 1)</div>
+  <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
   <div class="grid">
     <div><label>X (%)</label><input type="number" id="knobSmallX" value="31" step=".1"></div>
     <div><label>Y (%)</label><input type="number" id="knobSmallY" value="64.2" step=".1"></div>
@@ -140,7 +126,7 @@
   <input type="file" id="fileNoise" accept="audio/*">
   <label>Целевой трек 2</label>
   <input type="file" id="fileSignal" accept="audio/*">
-  <label>Порог переключения</label><input type="number" id="targetAngle" value="130">
+  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
 
   <div class="section-title">5. Настройки неонов</div>
   <label><input type="checkbox" id="neonArrow" checked>Неоновая подсветка стрелки</label>
@@ -152,13 +138,12 @@
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
-    <div id="power-indicator">de/aktivieren (links)</div>
     <div id="body"></div>
     <div id="arrow" class="neon"></div>
     <div id="volume" class="knob neon"></div>
     <div id="tuning" class="knob neon"></div>
     <div id="status">
-      <span>Frequenzen: <b id="freq">56</b></span>
+      <span>FREQUENZ: <b id="freq">56</b></span>
     </div>
   </div>
 </div>
@@ -184,7 +169,6 @@ let signalDataUrl = "";
 const noiseAudio = $('noiseAudio');
 const signalAudio = $('signalAudio');
 
-// Обработка загрузки файлов с ПК
 $('fileNoise').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -269,19 +253,14 @@ function setKnobLayout(el, inputX, inputY, inputSize, W, H){
 
 function togglePower(){
   isPowerOn = !isPowerOn;
-  const ind = $('power-indicator');
   
   if(isPowerOn){
-    ind.textContent = 'ВКЛ';
-    ind.classList.add('on');
     if (noiseDataUrl) noiseAudio.src = noiseDataUrl;
     if (signalDataUrl) signalAudio.src = signalDataUrl;
     
     noiseAudio.play().catch(e => console.log(e));
     signalAudio.play().catch(e => console.log(e));
   } else {
-    ind.textContent = 'de/aktivieren (links)';
-    ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
   }
@@ -404,8 +383,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .knob.neon { box-shadow: 0 0 8px #00e5ff, inset 0 0 4px #00e5ff; border: 1px solid #00e5ff !important; }
 #volume { left: calc(${$('knobSmallX').value}% - ${$('knobSmallSize').value / 2}px); top: calc(${$('knobSmallY').value}% - ${$('knobSmallSize').value / 2}px); width: ${$('knobSmallSize').value}px; height: ${$('knobSmallSize').value}px; }
 #tuning { left: calc(${$('knobBigX').value}% - ${$('knobBigSize').value / 2}px); top: calc(${$('knobBigY').value}% - ${$('knobBigSize').value / 2}px); width: ${$('knobBigSize').value}px; height: ${$('knobBigSize').value}px; }
-#power-indicator { position: absolute; top: 10px; right: 10px; padding: 4px 8px; font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.6); color: #888; border-radius: 3px; z-index: 20; }
-#power-indicator.on { background: #00c853; color: #fff; }
 #status { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; background: rgba(0,0,0,.4); padding: 6px 12px; font-size: 11px; color: #888; display: flex; justify-content: space-between; border-radius: 4px; }
 #freq { color: #00e676; font-weight: bold; }
 </style>
@@ -413,12 +390,11 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 <body>
 <div class="radio-container" id="mainContainer">
   <div class="radio" id="radio">
-    <div id="power-indicator">de/aktivieren (links)</div>
     <div id="body"></div>
     <div id="arrow" class="${$('neonArrow').checked ? 'neon' : ''}"></div>
     <div id="volume" class="knob ${$('neonKnobs').checked ? 'neon' : ''}"></div>
     <div id="tuning" class="knob ${$('neonKnobs').checked ? 'neon' : ''}"></div>
-    <div id="status"><span>Frequenzen: <b id="freq">${$('minX').value}</b></span></div>
+    <div id="status"><span>FREQUENZ: <b id="freq">${$('minX').value}</b></span></div>
   </div>
 </div>
 <audio id="noiseAudio" loop preload="auto" src="${noiseDataUrl}"></audio>
@@ -439,15 +415,10 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 
   function togglePower(){
     isPowerOn = !isPowerOn;
-    const ind = document.getElementById('power-indicator');
     if(isPowerOn){ 
-      ind.textContent = 'Hier'; 
-      ind.classList.add('on'); 
       noiseAudio.play().catch(()=>{}); 
       signalAudio.play().catch(()=>{}); 
     } else { 
-      ind.textContent = 'de/aktivieren (links)'; 
-      ind.classList.remove('on'); 
       noiseAudio.pause(); 
       signalAudio.pause(); 
     }
@@ -512,12 +483,12 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
   codeArea.style.display = 'block';
   codeArea.select();
   navigator.clipboard.writeText(iframeCode);
-  alert('IFRAME с запечённым аудио скопирован!');
+  alert('IFRAME скопирован!');
 });
 
 $('tuning').addEventListener('mousedown', e => startDrag(e, 'tuning'));
 $('volume').addEventListener('mousedown', e => startDrag(e, 'volume'));
-$('tuning').addEventListener('touchstart', e => startDrag(e, 'tuning'), {passive: false});
+$('tuning').addEventListener('touchstart', e => startDrag(e, 'touchstart'), {passive: false});
 $('volume').addEventListener('touchstart', e => startDrag(e, 'volume'), {passive: false});
 
 window.addEventListener('mousemove', moveDrag);
