@@ -137,8 +137,8 @@
 
   <div class="section-title">4. Звуковые файлы</div>
   <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="1.mp3">
-  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.mp3">
-  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
+  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.MP3">
+  <label>Порог переключения</label><input type="number" id="targetAngle" value="130">
 
   <div class="section-title">5. Настройки неонов</div>
   <label><input type="checkbox" id="neonArrow" checked>Неоновая подсветка стрелки</label>
@@ -261,7 +261,7 @@ function togglePower(){
 function updateAudioLogic(){
   if(!isPowerOn) return;
   const min = parseFloat($('minX').value) || 56;
-  const target = parseFloat($('targetAngle').value) || 230;
+  const target = parseFloat($('targetAngle').value) || 150;
 
   const windowSize = 20; 
   if (currentPos < target - windowSize) {
