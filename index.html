@@ -14,28 +14,58 @@
 #FX_ROOT_RADIO .blue { color: #00bfff; }
 #FX_ROOT_RADIO .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 
+/* Стиль кнопки сгенерировать IFRAME */
+#FX_ROOT_RADIO .btn-iframe {
+  width: 100%;
+  background: #00b894;
+  color: #000;
+  font-weight: bold;
+  font-size: 11px;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+#FX_ROOT_RADIO .btn-iframe:hover { background: #55efc4; }
+
+#FX_ROOT_RADIO textarea.out-code {
+  width: 100%;
+  height: 70px;
+  background: #0a0a0a;
+  border: 1px solid #333;
+  color: #00e676;
+  font-family: monospace;
+  font-size: 9px;
+  margin-top: 6px;
+  padding: 4px;
+  resize: vertical;
+  display: none;
+}
+
 #FX_ROOT_RADIO .rsg-viewport { flex: 1; display: flex; justify-content: center; align-items: center; background: #050505; position: relative; }
 #FX_ROOT_RADIO .radio { position: relative; width: min(600px, 90%); aspect-ratio: 3/2; background: #0a0a0a; border: 1px dashed #333; overflow: hidden; }
 
 #FX_ROOT_RADIO #body { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 1; }
-
-/* Стрелка с неоновой подсветкой */
 #FX_ROOT_RADIO #arrow { 
   position: absolute; 
   background-size: contain; 
   background-repeat: no-repeat; 
   background-position: top center; 
   pointer-events: none; 
-  z-index: 2; 
-  transition: filter 0.2s ease;
+  z-index: 2;
+  transition: filter 0.2s;
 }
 
-#FX_ROOT_RADIO #arrow.neon-arrow {
-  filter: drop-shadow(0 0 5px #ff0033) drop-shadow(0 0 10px #ff0033);
-  background-color: #ff0033; /* Запасной неон, если картинка не прогрузилась */
+#FX_ROOT_RADIO #arrow.neon {
+  filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 8px #ff0033);
 }
 
-/* Ручки управления */
 #FX_ROOT_RADIO .knob {
   position: absolute;
   border-radius: 50%;
@@ -48,9 +78,9 @@
 }
 #FX_ROOT_RADIO .knob:active { cursor: grabbing; }
 
-#FX_ROOT_RADIO .knob.neon-knob {
-  box-shadow: 0 0 10px #00e5ff, inset 0 0 5px #00e5ff;
-  border: 1px solid #00e5ff;
+#FX_ROOT_RADIO .knob.neon {
+  box-shadow: 0 0 8px #00e5ff, inset 0 0 4px #00e5ff;
+  border: 1px solid #00e5ff !important;
 }
 
 #FX_ROOT_RADIO #power-indicator {
@@ -111,17 +141,20 @@
   <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
 
   <div class="section-title">5. Настройки неонов</div>
-  <label><input type="checkbox" id="neonArrow" checked> Неоновая подсветка стрелки</label>
-  <label><input type="checkbox" id="neonKnobs" checked> Неоновая подсветка кнопок</label>
+  <label><input type="checkbox" id="neonArrow" checked>Неоновая подсветка стрелки</label>
+  <label><input type="checkbox" id="neonKnobs" checked>Неоновая подсветка кнопок</label>
+
+  <button class="btn-iframe" id="btnIframe">📋 Сгенерировать IFRAME</button>
+  <textarea id="outIframe" class="out-code" readonly></textarea>
 </div>
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
     <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
     <div id="body"></div>
-    <div id="arrow"></div>
-    <div id="volume" class="knob"></div>
-    <div id="tuning" class="knob"></div>
+    <div id="arrow" class="neon"></div>
+    <div id="volume" class="knob neon"></div>
+    <div id="tuning" class="knob neon"></div>
     <div id="status">
       <span>ЧАСТОТА: <b id="freq">56</b></span>
     </div>
@@ -154,26 +187,23 @@ function updateImages(){
   $('body').style.backgroundImage = b ? `url("${b}")` : 'none';
   $('arrow').style.backgroundImage = a ? `url("${a}")` : 'none';
   
-  // Подсветка неоном
-  if($('neonArrow').checked) {
-    $('arrow').classList.add('neon-arrow');
-  } else {
-    $('arrow').classList.remove('neon-arrow');
-  }
+  const showNeonArrow = $('neonArrow').checked;
+  const showNeonKnobs = $('neonKnobs').checked;
+
+  if(showNeonArrow) $('arrow').classList.add('neon');
+  else $('arrow').classList.remove('neon');
 
   ['tuning', 'volume'].forEach(id => {
     const el = $(id);
     if(k) {
       el.style.backgroundImage = `url("${k}")`;
+      el.style.border = 'none';
     } else {
       el.style.backgroundImage = 'none';
     }
 
-    if($('neonKnobs').checked) {
-      el.classList.add('neon-knob');
-    } else {
-      el.classList.remove('neon-knob');
-    }
+    if(showNeonKnobs) el.classList.add('neon');
+    else el.classList.remove('neon');
   });
 }
 
@@ -181,6 +211,15 @@ function updatePositions(){
   const box = $('radio');
   const W = box.clientWidth;
   const H = box.clientHeight;
+
+  const baseX = (parseFloat($('posX').value) / 100) * W;
+  const ay = (parseFloat($('posY').value) / 100) * H;
+  const aw = parseFloat($('size').value) || 27;
+  const ah = parseFloat($('arrowHeight').value) || 45;
+
+  $('arrow').style.top = ay + 'px';
+  $('arrow').style.width = aw + 'px';
+  $('arrow').style.height = ah + 'px';
 
   setKnobLayout($('volume'), $('knobSmallX'), $('knobSmallY'), $('knobSmallSize'), W, H);
   setKnobLayout($('tuning'), $('knobBigX'), $('knobBigY'), $('knobBigSize'), W, H);
@@ -205,70 +244,59 @@ function togglePower(){
   if(isPowerOn){
     ind.textContent = 'ВКЛ';
     ind.classList.add('on');
-    
     noiseAudio.src = $('noiseFile').value.trim();
     signalAudio.src = $('signalFile').value.trim();
     
-    // Запускаем оба трека разом, чтобы пройти защиту Autoplay
-    Promise.all([
-      noiseAudio.play().catch(e => console.log(e)),
-      signalAudio.play().catch(e => console.log(e))
-    ]).then(() => {
-      updateAudioLogic();
-    });
+    noiseAudio.play().catch(()=>{});
+    signalAudio.play().catch(()=>{});
   } else {
     ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
     ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
   }
+  updateAudioLogic();
 }
 
 function updateAudioLogic(){
   if(!isPowerOn) return;
+  const min = parseFloat($('minX').value) || 56;
   const target = parseFloat($('targetAngle').value) || 230;
 
-  // Воспроизведение управляется уровнем громкости обоих аудио,
-  // чтобы избежать блокировок браузера при переключении
-  if(currentPos >= target){
+  const windowSize = 20; 
+  if (currentPos < target - windowSize) {
+    noiseAudio.volume = 1;
+    signalAudio.volume = 0;
+  } else if (currentPos > target + windowSize) {
     noiseAudio.volume = 0;
     signalAudio.volume = 1;
   } else {
-    noiseAudio.volume = 1;
-    signalAudio.volume = 0;
+    const ratio = (currentPos - (target - windowSize)) / (windowSize * 2);
+    noiseAudio.volume = 1 - ratio;
+    signalAudio.volume = ratio;
   }
 }
 
 function render(){
-  const minVal = parseFloat($('minX').value) || 56;
-  const maxVal = parseFloat($('maxX').value) || 280;
-  const baseX = parseFloat($('posX').value) || 35.3;
-  const baseY = parseFloat($('posY').value) || 63;
+  const min = parseFloat($('minX').value) || 56;
+  const max = parseFloat($('maxX').value) || 280;
   
-  // Жесткая фиксация в пределах шкалы
-  currentPos = Math.max(minVal, Math.min(maxVal, currentPos));
+  currentPos = Math.max(min, Math.min(max, currentPos));
 
   const W = $('radio').clientWidth;
-  const H = $('radio').clientHeight;
+  const baseX = (parseFloat($('posX').value) / 100) * W;
   const aw = parseFloat($('size').value) || 27;
-  const ah = parseFloat($('arrowHeight').value) || 45;
 
-  // Расчет смещения от базовой точки X к краю шкалы
-  const minPx = (baseX / 100) * W;
-  const totalTravelPx = ((maxVal - minVal) / 280) * (W * 0.45); // Ограничение движения шириной шкалы
-  const ratio = (currentPos - minVal) / (maxVal - minVal || 1);
-  const currentPx = minPx + ratio * totalTravelPx;
+  const maxTravelPx = (0.675 * W) - baseX;
+  const ratio = (currentPos - min) / (max - min || 1);
+  const currentX = baseX + (ratio * maxTravelPx) - (aw / 2);
 
-  $('arrow').style.left = (currentPx - aw / 2) + 'px';
-  $('arrow').style.top = (baseY / 100) * H + 'px';
-  $('arrow').style.width = aw + 'px';
-  $('arrow').style.height = ah + 'px';
-
+  $('arrow').style.left = currentX + 'px';
   $('tuning').style.transform = `rotate(${tuningAngle}deg)`;
   $('volume').style.transform = `rotate(${volumeAngle}deg)`;
 
-  $('testRot').min = minVal;
-  $('testRot').max = maxVal;
+  $('testRot').min = min;
+  $('testRot').max = max;
   $('testRot').value = currentPos;
   $('testLabel').textContent = Math.round(currentPos);
   $('freq').textContent = Math.round(currentPos);
@@ -311,7 +339,7 @@ function moveDrag(e){
   if(activeDrag.type === 'tuning'){
     tuningAngle += delta;
     activeDrag.startAngle = currentAngle;
-    currentPos += delta * 0.5; // Чувствительность вращения
+    currentPos += delta * 0.3;
   } else {
     volumeAngle += delta;
     activeDrag.startAngle = currentAngle;
@@ -326,6 +354,17 @@ function stopDrag(){
   }
   activeDrag = null; 
 }
+
+// Генератор IFRAME кода
+$('btnIframe').addEventListener('click', () => {
+  const codeArea = $('outIframe');
+  const iframeCode = `<iframe srcdoc="${document.documentElement.outerHTML.replace(/"/g, '&quot;')}" width="100%" height="100%" frameborder="0" allow="autoplay"></iframe>`;
+  codeArea.value = iframeCode;
+  codeArea.style.display = 'block';
+  codeArea.select();
+  navigator.clipboard.writeText(iframeCode);
+  alert('IFRAME скопирован в буфер обмена!');
+});
 
 $('tuning').addEventListener('mousedown', e => startDrag(e, 'tuning'));
 $('volume').addEventListener('mousedown', e => startDrag(e, 'volume'));
