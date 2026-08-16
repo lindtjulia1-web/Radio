@@ -134,9 +134,9 @@
   </div>
   <label>Размер (px)</label><input type="number" id="knobBigSize" value="36">
 
-  <div class="section-title">4. Звуковые файлы</div>
-  <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="1.mp3">
-  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.mp3">
+  <div class="section-title">4. Звуковые файлы (Прямые URL)</div>
+  <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="https://actions.google.com/sounds/v1/ambiences/white_noise.ogg">
+  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="https://actions.google.com/sounds/v1/crowds/cheering_happy.ogg">
   <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
 
   <div class="section-title">5. Настройки неонов</div>
@@ -246,8 +246,8 @@ function togglePower(){
     noiseAudio.src = $('noiseFile').value.trim();
     signalAudio.src = $('signalFile').value.trim();
     
-    noiseAudio.play().catch(()=>{});
-    signalAudio.play().catch(()=>{});
+    noiseAudio.play().catch(e => console.log('Audio blocked:', e));
+    signalAudio.play().catch(e => console.log('Audio blocked:', e));
   } else {
     ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
     ind.classList.remove('on');
@@ -380,7 +380,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 </style>
 </head>
 <body>
-<div class="radio-container">
+<div class="radio-container" id="mainContainer">
   <div class="radio" id="radio">
     <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
     <div id="body"></div>
@@ -396,13 +396,33 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 (function(){
   let currentPos = ${$('minX').value}, tuningAngle = 0, volumeAngle = 0, activeDrag = null, isPowerOn = false;
   const noiseAudio = document.getElementById('noiseAudio'), signalAudio = document.getElementById('signalAudio');
+  
+  function unlockAudio() {
+    noiseAudio.play().then(() => { if (!isPowerOn) noiseAudio.pause(); }).catch(()=>{});
+    signalAudio.play().then(() => { if (!isPowerOn) signalAudio.pause(); }).catch(()=>{});
+    window.removeEventListener('click', unlockAudio);
+    window.removeEventListener('touchstart', unlockAudio);
+  }
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('touchstart', unlockAudio);
+
   function togglePower(){
     isPowerOn = !isPowerOn;
     const ind = document.getElementById('power-indicator');
-    if(isPowerOn){ ind.textContent = 'ВКЛ'; ind.classList.add('on'); noiseAudio.play().catch(()=>{}); signalAudio.play().catch(()=>{}); }
-    else { ind.textContent = 'ВЫКЛ (Кликните левую ручку)'; ind.classList.remove('on'); noiseAudio.pause(); signalAudio.pause(); }
+    if(isPowerOn){ 
+      ind.textContent = 'ВКЛ'; 
+      ind.classList.add('on'); 
+      noiseAudio.play().catch(()=>{}); 
+      signalAudio.play().catch(()=>{}); 
+    } else { 
+      ind.textContent = 'ВЫКЛ (Кликните левую ручку)'; 
+      ind.classList.remove('on'); 
+      noiseAudio.pause(); 
+      signalAudio.pause(); 
+    }
     updateAudio();
   }
+
   function updateAudio(){
     if(!isPowerOn) return;
     const target = ${$('targetAngle').value}, windowSize = 20;
@@ -410,6 +430,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     else if (currentPos > target + windowSize) { noiseAudio.volume = 0; signalAudio.volume = 1; }
     else { const ratio = (currentPos - (target - windowSize)) / (windowSize * 2); noiseAudio.volume = 1 - ratio; signalAudio.volume = ratio; }
   }
+
   function render(){
     const min = ${$('minX').value}, max = ${$('maxX').value};
     currentPos = Math.max(min, Math.min(max, currentPos));
@@ -421,12 +442,15 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     document.getElementById('freq').textContent = Math.round(currentPos);
     updateAudio();
   }
+
   function getAngle(e, el){
     const rect = el.getBoundingClientRect(), cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
     const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0, clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
     return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
   }
+
   function startDrag(e, type){ e.preventDefault(); const el = document.getElementById(type); activeDrag = { type: type, el: el, startAngle: getAngle(e, el), moved: false }; }
+
   function moveDrag(e){
     if(!activeDrag) return; e.preventDefault();
     const currentAngle = getAngle(e, activeDrag.el);
@@ -437,7 +461,9 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     else { volumeAngle += delta; activeDrag.startAngle = currentAngle; }
     render();
   }
+
   function stopDrag(){ if(activeDrag && activeDrag.type === 'volume' && !activeDrag.moved) togglePower(); activeDrag = null; }
+
   document.getElementById('tuning').addEventListener('mousedown', e => startDrag(e, 'tuning'));
   document.getElementById('volume').addEventListener('mousedown', e => startDrag(e, 'volume'));
   document.getElementById('tuning').addEventListener('touchstart', e => startDrag(e, 'tuning'), {passive: false});
@@ -460,7 +486,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 
 $('tuning').addEventListener('mousedown', e => startDrag(e, 'tuning'));
 $('volume').addEventListener('mousedown', e => startDrag(e, 'volume'));
-$('tuning').addEventListener('touchstart', e => startDrag(e, 'tuning'), {passive: false});
+$('tuning').addEventListener('touchstart', e => startDrag(e, 'touchstart'), {passive: false});
 $('volume').addEventListener('touchstart', e => startDrag(e, 'volume'), {passive: false});
 
 window.addEventListener('mousemove', moveDrag);
