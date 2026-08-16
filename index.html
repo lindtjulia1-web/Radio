@@ -19,8 +19,23 @@
 #FX_ROOT_RADIO .radio{position:relative;width:min(600px,90%);aspect-ratio:3/2;background:#0a0a0a;border:1px dashed #2c2c2c;overflow:hidden}
 #FX_ROOT_RADIO #body{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;pointer-events:none;z-index:1}
 #FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform;transition:filter .3s ease}
-#FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:20;cursor:grab;pointer-events:auto !important;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none;transition:box-shadow .3s ease, filter .3s ease}
+
+/* Исправленный CSS для отображения картинок ручек */
+#FX_ROOT_RADIO .knob{
+  position:absolute;
+  border-radius:50%;
+  z-index:20;
+  cursor:grab;
+  pointer-events:auto !important;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  touch-action:none;
+  transition:box-shadow .3s ease, filter .3s ease;
+  background-color: #222; /* дефолтный цвет, если картинка еще не загружена */
+}
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
+
 #FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:25;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;background:transparent;border:none;user-select:none;pointer-events:none !important}
 #FX_ROOT_RADIO #power.on{color:#00c853;text-shadow:0 0 5px #00c853}
 #FX_ROOT_RADIO #led{position:absolute;border-radius:50%;z-index:5;background:#1a1a1a;border:1px solid #333;pointer-events:none}
@@ -32,13 +47,19 @@
 #FX_ROOT_RADIO #success.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #FX_ROOT_RADIO #success b{display:block;color:#ffcc00;font-size:24px;margin-bottom:7px}
 
-/* Эффекты неонового свечения */
+/* Эффекты неонового свечения и индикации нажатия */
 #FX_ROOT_RADIO .neon-glow-arrow {
   filter: drop-shadow(0 0 2px #ff0055) drop-shadow(0 0 6px #ff0055) drop-shadow(0 0 12px #ff3300);
 }
 #FX_ROOT_RADIO .neon-glow-knob {
-  box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff, inset 0 0 10px #00e5ff;
-  filter: drop-shadow(0 0 5px #00e5ff);
+  box-shadow: 0 0 12px #00e5ff, 0 0 24px #00e5ff, inset 0 0 8px #00e5ff;
+  filter: drop-shadow(0 0 6px #00e5ff);
+  animation: pulseNeon 2s infinite alternate;
+}
+
+@keyframes pulseNeon {
+  0% { box-shadow: 0 0 8px #00e5ff, 0 0 16px #00e5ff; }
+  100% { box-shadow: 0 0 16px #00e5ff, 0 0 30px #00e5ff, 0 0 40px #00e5ff; }
 }
 
 @media(max-width:800px){#FX_ROOT_RADIO .rsg-panel{width:200px;flex-basis:200px;padding:8px}}
@@ -84,9 +105,9 @@
 <label>Размер (px)</label><input type="number" data-id="knobBigSize" value="70">
 
 <div class="section-title">4. Звуковые файлы</div>
-<label>Фоновый фоновый Трек 1 (mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
-<label>Целевой Трек 2 (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
-<label>Целевое значение для Трека 2</label><input type="number" data-id="targetAngle" value="280" step="1">
+<label>Фоновый Трек 1 (Шум mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
+<label>Целевой Трек 2 (Радио mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
+<label>Порог переключения (Частота)</label><input type="number" data-id="targetAngle" value="230" step="1">
 
 <div class="section-title green">5. Настройки фона и неонов</div>
 <label style="display:flex;align-items:center;text-transform:none;color:#aaa">
@@ -142,24 +163,30 @@ ROOT.dataset.ready='1';
 const $=id=>ROOT.querySelector('[data-id="'+id+'"]')||ROOT.querySelector('#'+id);
 const minX=()=>parseFloat($('minX').value)||30;
 const maxX=()=>parseFloat($('maxX').value)||280;
-const target=()=>parseFloat($('targetAngle').value)||280;
+const target=()=>parseFloat($('targetAngle').value)||230;
 
 let currentPos=30;
 let tuningAngle=0;
 let volumeAngle=0;
 let powerOn=false;
 let drag=null;
-let solved=false;
 
 const bars=[...ROOT.querySelectorAll('.sbar')];
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
 function updateImages(){
-  $('body').style.backgroundImage=$('bodyUrl').value.trim()?`url("${$('bodyUrl').value.trim()}")`:'none';
-  $('arrow').style.backgroundImage=$('arrowUrl').value.trim()?`url("${$('arrowUrl').value.trim()}")`:'none';
-  const u=$('knobsUrl').value.trim();
-  ['tuning','volume'].forEach(id=>{$(id).style.backgroundImage=u?`url("${u}")`:'none';});
+  const bodyUrl = $('bodyUrl').value.trim();
+  const arrowUrl = $('arrowUrl').value.trim();
+  const knobsUrl = $('knobsUrl').value.trim();
+
+  $('body').style.backgroundImage = bodyUrl ? `url("${bodyUrl}")` : 'none';
+  $('arrow').style.backgroundImage = arrowUrl ? `url("${arrowUrl}")` : 'none';
+  
+  // Картинка применяются к двум ручкам сразу
+  const knobBg = knobsUrl ? `url("${knobsUrl}")` : 'none';
+  $('tuning').style.backgroundImage = knobBg;
+  $('volume').style.backgroundImage = knobBg;
 }
 
 function updateStyles(){
@@ -173,7 +200,6 @@ function updateStyles(){
     left:ax+'px',top:ay+'px',width:aw+'px',height:ah+'px'
   });
 
-  // Управление неоновой подсветкой
   $('arrow').classList.toggle('neon-glow-arrow', $('neonArrow').checked);
   const isNeonKnobs = $('neonKnobs').checked;
   $('tuning').classList.toggle('neon-glow-knob', isNeonKnobs);
@@ -190,7 +216,6 @@ function updateStyles(){
   box.style.background=transparent?'transparent':'#0a0a0a';
   box.style.backgroundImage=!transparent&&bg?`url("${bg}")`:'none';
 
-  // Питание строго синхронизировано с левой ручкой
   const btnSize = Math.max(20, parseFloat($('knobSmallSize').value) || 70);
   const btnX = parseFloat($('knobSmallX').value) || 20;
   const btnY = parseFloat($('knobSmallY').value) || 68;
@@ -228,28 +253,31 @@ function render(){
 }
 
 function updateBars(pos){
-  const d=Math.abs(pos-target());
-  const maxD=maxX()-minX();
-  const strength=Math.max(0,1-d/(maxD*0.1));
-  const level=Math.round(strength*5);
-  bars.forEach((b,i)=>b.classList.toggle('active',i<level));
+  const targetVal = target();
+  const level = pos >= targetVal ? 5 : Math.min(4, Math.floor((pos - minX()) / (targetVal - minX()) * 4));
+  bars.forEach((b,i)=>b.classList.toggle('active', i < level));
 }
 
+/* Логика воспроизведения аудио: шум до 230, затем чистый трек 2 */
 function updateAudio(pos){
-  if(!powerOn)return;
-  const noise=$('noiseAudio'),signal=$('signalAudio');
-  const d=Math.abs(pos-target());
-  const tolerance=10;
+  if(!powerOn) return;
+  const noise=$('noiseAudio'), signal=$('signalAudio');
+  const targetVal = target();
 
-  if(d<=tolerance){
-    const sig=Math.pow(1-d/tolerance,2);
-    noise.volume=(1-sig);
-    signal.volume=sig;
-    if(sig>0.05 && signal.paused)signal.play().catch(()=>{});
-    if(d<=2)win();
+  if(pos >= targetVal){
+    // При достижения 230 играет Трек 2
+    noise.pause();
+    noise.volume = 0;
+    signal.volume = 1;
+    if(signal.paused) signal.play().catch(()=>{});
+    $('success').classList.add('show');
   }else{
-    signal.pause(); signal.volume=0;
-    noise.volume=1;
+    // До 230 играет Шум (Трек 1)
+    signal.pause();
+    signal.volume = 0;
+    noise.volume = 1;
+    if(noise.paused) noise.play().catch(()=>{});
+    $('success').classList.remove('show');
   }
 }
 
@@ -260,13 +288,14 @@ function togglePower(){
 
   const n=$('noiseAudio'),s=$('signalAudio');
   if(powerOn){
+    currentPos = minX(); // При включении сбрасываем на позицию 30
     n.src=$('noiseFile').value.trim();
     s.src=$('signalFile').value.trim();
-    n.volume=1; s.volume=0;
-    n.play().catch(()=>{});
     render();
   }else{
-    n.pause();s.pause();n.volume=0;s.volume=0;
+    n.pause(); s.pause();
+    n.volume=0; s.volume=0;
+    $('success').classList.remove('show');
   }
 }
 
@@ -295,7 +324,8 @@ function moveDrag(e){
   if(drag.type==='tuning'){
     tuningAngle+=d;
     drag.start=pointerAngle(e,el);
-    currentPos=clamp(currentPos+d*0.3, minX(), maxX());
+    // Движение стрелки слева направо при вращении правой ручки
+    currentPos=clamp(currentPos + d*0.3, minX(), maxX());
   }else{
     volumeAngle+=d;
     drag.start=pointerAngle(e,el);
