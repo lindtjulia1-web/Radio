@@ -7,6 +7,7 @@
 #FX_ROOT_RADIO label { display: block; font-size: 10px; font-weight: bold; margin: 4px 0 2px; color: #8a8a8a; text-transform: uppercase; }
 #FX_ROOT_RADIO input[type=text], #FX_ROOT_RADIO input[type=number] { width: 100%; background: #000; border: 1px solid #2c2c2c; color: #fff; padding: 4px 6px; margin-bottom: 4px; border-radius: 3px; font-size: 11px; }
 #FX_ROOT_RADIO input:focus { border-color: #ff0033; outline: none; }
+#FX_ROOT_RADIO input[type=checkbox] { margin: 0 6px 0 0; cursor: pointer; }
 #FX_ROOT_RADIO input[type=range] { width: 100%; accent-color: #ff0033; margin-bottom: 6px; }
 #FX_ROOT_RADIO .section-title { color: #ffcc00; font-size: 10px; text-transform: uppercase; font-weight: bold; margin: 10px 0 4px; border-top: 1px solid #222; padding-top: 6px; }
 #FX_ROOT_RADIO .red { color: #ff3333; }
@@ -17,7 +18,20 @@
 #FX_ROOT_RADIO .radio { position: relative; width: min(600px, 90%); aspect-ratio: 3/2; background: #0a0a0a; border: 1px dashed #333; overflow: hidden; }
 
 #FX_ROOT_RADIO #body { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 1; }
-#FX_ROOT_RADIO #arrow { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: top center; pointer-events: none; z-index: 2; }
+#FX_ROOT_RADIO #arrow { 
+  position: absolute; 
+  background-size: contain; 
+  background-repeat: no-repeat; 
+  background-position: top center; 
+  pointer-events: none; 
+  z-index: 2;
+  transition: filter 0.2s;
+}
+
+/* Неоновая подсветка стрелки */
+#FX_ROOT_RADIO #arrow.neon {
+  filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 8px #ff0033);
+}
 
 #FX_ROOT_RADIO .knob {
   position: absolute;
@@ -31,16 +45,10 @@
 }
 #FX_ROOT_RADIO .knob:active { cursor: grabbing; }
 
-#FX_ROOT_RADIO .knob-fallback::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 25%;
-  background: #ff0033;
-  border-radius: 2px;
+/* Неоновая подсветка ручек */
+#FX_ROOT_RADIO .knob.neon {
+  box-shadow: 0 0 8px #00e5ff, inset 0 0 4px #00e5ff;
+  border: 1px solid #00e5ff !important;
 }
 
 #FX_ROOT_RADIO #power-indicator {
@@ -68,27 +76,27 @@
   <label>URL Стрелки</label><input type="text" id="arrowUrl" value="https://img.genially.com/666ae277f4d337001">
   <label>URL Ручек</label><input type="text" id="knobsUrl" value="">
 
-  <div class="section-title">1. Настройка шкалы стрелки</div>
+  <div class="section-title">1. Калибровка стрелки</div>
   <div class="grid">
-    <div><label>Y Положение (%)</label><input type="number" id="posY" value="63" step=".1"></div>
-    <div><label>Ширина (px)</label><input type="number" id="size" value="18"></div>
+    <div><label>Базовый X (%)</label><input type="number" id="posX" value="35.3" step=".1"></div>
+    <div><label>Базовый Y (%)</label><input type="number" id="posY" value="63" step=".1"></div>
+    <div><label>Ширина (px)</label><input type="number" id="size" value="27"></div>
     <div><label>Высота (px)</label><input type="number" id="arrowHeight" value="45"></div>
-    <div><label>Порог Трека 2 (%)</label><input type="number" id="targetAngle" value="70"></div>
-    <div><label>Мин X (%)</label><input type="number" id="minX" value="35"></div>
-    <div><label>Макс X (%)</label><input type="number" id="maxX" value="65"></div>
+    <div><label>Мин. значение</label><input type="number" id="minX" value="56"></div>
+    <div><label>Макс. значение</label><input type="number" id="maxX" value="280"></div>
   </div>
 
-  <label>Тест положения стрелки (%)</label>
-  <input type="range" id="testRot" min="35" max="65" value="35">
+  <label>Тест положения: <span id="testLabel">56</span></label>
+  <input type="range" id="testRot" min="56" max="280" value="56">
 
-  <div class="section-title red">2. Левая ручка (ВКЛ / ВЫКЛ)</div>
+  <div class="section-title red">2. Левая ручка (ВКЛ / Трек 1)</div>
   <div class="grid">
     <div><label>X (%)</label><input type="number" id="knobSmallX" value="31" step=".1"></div>
     <div><label>Y (%)</label><input type="number" id="knobSmallY" value="64.2" step=".1"></div>
   </div>
   <label>Размер (px)</label><input type="number" id="knobSmallSize" value="36">
 
-  <div class="section-title blue">3. Правая ручка (Вращение стрелки)</div>
+  <div class="section-title blue">3. Правая ручка (Настройка частоты)</div>
   <div class="grid">
     <div><label>X (%)</label><input type="number" id="knobBigX" value="67.5" step=".1"></div>
     <div><label>Y (%)</label><input type="number" id="knobBigY" value="64.1" step=".1"></div>
@@ -96,19 +104,24 @@
   <label>Размер (px)</label><input type="number" id="knobBigSize" value="36">
 
   <div class="section-title">4. Звуковые файлы</div>
-  <label>Фоновый Трек 1 (Шум)</label><input type="text" id="noiseFile" value="1.mp3">
-  <label>Целевой Трек 2 (Радио)</label><input type="text" id="signalFile" value="2.mp3">
+  <label>Фоновый трек 1 (MP3)</label><input type="text" id="noiseFile" value="1.mp3">
+  <label>Целевой трек 2 (MP3)</label><input type="text" id="signalFile" value="2.mp3">
+  <label>Порог переключения</label><input type="number" id="targetAngle" value="230">
+
+  <div class="section-title">5. Настройки неонов</div>
+  <label><input type="checkbox" id="neonArrow" checked>Неоновая подсветка стрелки</label>
+  <label><input type="checkbox" id="neonKnobs" checked>Неоновая подсветка кнопок</label>
 </div>
 
 <div class="rsg-viewport">
   <div class="radio" id="radio">
-    <div id="power-indicator">ВЫКЛ (Клик по левой ручке)</div>
+    <div id="power-indicator">ВЫКЛ (Кликните левую ручку)</div>
     <div id="body"></div>
-    <div id="arrow"></div>
-    <div id="volume" class="knob"></div>
-    <div id="tuning" class="knob"></div>
+    <div id="arrow" class="neon"></div>
+    <div id="volume" class="knob neon"></div>
+    <div id="tuning" class="knob neon"></div>
     <div id="status">
-      <span>ПОЛОЖЕНИЕ СТРЕЛКИ: <b id="freq">35%</b></span>
+      <span>ЧАСТОТА: <b id="freq">56</b></span>
     </div>
   </div>
 </div>
@@ -122,7 +135,7 @@
 const ROOT = document.getElementById('FX_ROOT_RADIO');
 const $ = id => ROOT.querySelector('#' + id);
 
-let currentPercent = 35; 
+let currentPos = 56;
 let tuningAngle = 0;
 let volumeAngle = 0;
 let activeDrag = null;
@@ -139,19 +152,23 @@ function updateImages(){
   $('body').style.backgroundImage = b ? `url("${b}")` : 'none';
   $('arrow').style.backgroundImage = a ? `url("${a}")` : 'none';
   
+  const showNeonArrow = $('neonArrow').checked;
+  const showNeonKnobs = $('neonKnobs').checked;
+
+  if(showNeonArrow) $('arrow').classList.add('neon');
+  else $('arrow').classList.remove('neon');
+
   ['tuning', 'volume'].forEach(id => {
     const el = $(id);
     if(k) {
       el.style.backgroundImage = `url("${k}")`;
-      el.style.backgroundColor = 'transparent';
       el.style.border = 'none';
-      el.classList.remove('knob-fallback');
     } else {
       el.style.backgroundImage = 'none';
-      el.style.backgroundColor = 'rgba(0,0,0,0.4)';
-      el.style.border = '1px dashed #00e5ff';
-      el.classList.add('knob-fallback');
     }
+
+    if(showNeonKnobs) el.classList.add('neon');
+    else el.classList.remove('neon');
   });
 }
 
@@ -160,17 +177,11 @@ function updatePositions(){
   const W = box.clientWidth;
   const H = box.clientHeight;
 
-  const minX = parseFloat($('minX').value) || 0;
-  const maxX = parseFloat($('maxX').value) || 100;
-
-  currentPercent = Math.max(minX, Math.min(maxX, currentPercent));
-
-  const ax = (currentPercent / 100) * W;
+  const baseX = (parseFloat($('posX').value) / 100) * W;
   const ay = (parseFloat($('posY').value) / 100) * H;
-  const aw = parseFloat($('size').value) || 18;
+  const aw = parseFloat($('size').value) || 27;
   const ah = parseFloat($('arrowHeight').value) || 45;
 
-  $('arrow').style.left = (ax - aw/2) + 'px';
   $('arrow').style.top = ay + 'px';
   $('arrow').style.width = aw + 'px';
   $('arrow').style.height = ah + 'px';
@@ -202,11 +213,9 @@ function togglePower(){
     signalAudio.src = $('signalFile').value.trim();
     
     noiseAudio.play().catch(()=>{});
-    signalAudio.play().then(() => {
-      if(currentPercent < parseFloat($('targetAngle').value)) signalAudio.pause();
-    }).catch(()=>{});
+    signalAudio.play().catch(()=>{});
   } else {
-    ind.textContent = 'ВЫКЛ (Клик по левой ручке)';
+    ind.textContent = 'ВЫКЛ (Кликните левую ручку)';
     ind.classList.remove('on');
     noiseAudio.pause();
     signalAudio.pause();
@@ -216,35 +225,48 @@ function togglePower(){
 
 function updateAudioLogic(){
   if(!isPowerOn) return;
-  const target = parseFloat($('targetAngle').value) || 70;
+  const min = parseFloat($('minX').value) || 56;
+  const target = parseFloat($('targetAngle').value) || 230;
 
-  if(currentPercent >= target){
-    noiseAudio.pause();
-    if(signalAudio.paused) signalAudio.play().catch(()=>{});
+  // Рассчитываем плавное переключение между треками
+  const windowSize = 20; // Зона перехода
+  if (currentPos < target - windowSize) {
+    noiseAudio.volume = 1;
+    signalAudio.volume = 0;
+  } else if (currentPos > target + windowSize) {
+    noiseAudio.volume = 0;
+    signalAudio.volume = 1;
   } else {
-    signalAudio.pause();
-    if(noiseAudio.paused) noiseAudio.play().catch(()=>{});
+    const ratio = (currentPos - (target - windowSize)) / (windowSize * 2);
+    noiseAudio.volume = 1 - ratio;
+    signalAudio.volume = ratio;
   }
 }
 
 function render(){
-  const minX = parseFloat($('minX').value) || 0;
-  const maxX = parseFloat($('maxX').value) || 100;
+  const min = parseFloat($('minX').value) || 56;
+  const max = parseFloat($('maxX').value) || 280;
   
-  currentPercent = Math.max(minX, Math.min(maxX, currentPercent));
+  currentPos = Math.max(min, Math.min(max, currentPos));
 
   const W = $('radio').clientWidth;
-  const ax = (currentPercent / 100) * W;
-  const aw = parseFloat($('size').value) || 18;
+  const baseX = (parseFloat($('posX').value) / 100) * W;
+  const aw = parseFloat($('size').value) || 27;
 
-  $('arrow').style.left = (ax - aw/2) + 'px';
+  // Ограниченное перемещение: от Базового X до правой границы шкалы (67.5% - положение правой ручки)
+  const maxTravelPx = (0.675 * W) - baseX;
+  const ratio = (currentPos - min) / (max - min || 1);
+  const currentX = baseX + (ratio * maxTravelPx) - (aw / 2);
+
+  $('arrow').style.left = currentX + 'px';
   $('tuning').style.transform = `rotate(${tuningAngle}deg)`;
   $('volume').style.transform = `rotate(${volumeAngle}deg)`;
 
-  $('testRot').min = minX;
-  $('testRot').max = maxX;
-  $('testRot').value = currentPercent;
-  $('freq').textContent = Math.round(currentPercent) + '%';
+  $('testRot').min = min;
+  $('testRot').max = max;
+  $('testRot').value = currentPos;
+  $('testLabel').textContent = Math.round(currentPos);
+  $('freq').textContent = Math.round(currentPos);
 
   updateAudioLogic();
 }
@@ -284,7 +306,7 @@ function moveDrag(e){
   if(activeDrag.type === 'tuning'){
     tuningAngle += delta;
     activeDrag.startAngle = currentAngle;
-    currentPercent += delta * 0.15; 
+    currentPos += delta * 0.3;
   } else {
     volumeAngle += delta;
     activeDrag.startAngle = currentAngle;
@@ -311,7 +333,7 @@ window.addEventListener('mouseup', stopDrag);
 window.addEventListener('touchend', stopDrag);
 
 $('testRot').addEventListener('input', e => {
-  currentPercent = parseFloat(e.target.value);
+  currentPos = parseFloat(e.target.value);
   render();
 });
 
