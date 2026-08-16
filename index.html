@@ -21,8 +21,8 @@
 #FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform}
 #FX_ROOT_RADIO .knob{position:absolute;border-radius:50%;z-index:4;cursor:grab;pointer-events:auto;background-size:contain;background-position:center;background-repeat:no-repeat;touch-action:none}
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
-#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#666;background:#1a1a1a;border:2px solid #555;user-select:none}
-#FX_ROOT_RADIO #power.on{background:#0f2a0f;border-color:#00c853;color:#00c853}
+#FX_ROOT_RADIO #power{position:absolute;border-radius:50%;z-index:6;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;background:transparent;border:none;user-select:none}
+#FX_ROOT_RADIO #power.on{color:#00c853;text-shadow:0 0 5px #00c853}
 #FX_ROOT_RADIO #led{position:absolute;border-radius:50%;z-index:5;background:#1a1a1a;border:1px solid #333;pointer-events:none}
 #FX_ROOT_RADIO #led.on{background:#00e676;box-shadow:0 0 10px #00e676}
 #FX_ROOT_RADIO #status{position:absolute;left:0;right:0;bottom:0;z-index:10;background:rgba(0,0,0,.65);padding:4px 12px;font-size:11px;color:#888;display:flex;justify-content:space-between;align-items:center}
@@ -170,7 +170,8 @@ function updateStyles(){
   box.style.background=transparent?'transparent':'#0a0a0a';
   box.style.backgroundImage=!transparent&&bg?`url("${bg}")`:'none';
 
-  place($('power'),parseFloat($('btnX').value)/100*W-15,parseFloat($('btnY').value)/100*H-15,30);
+  const btnSize=parseFloat($('knobSmallSize').value)||70;
+  place($('power'),parseFloat($('btnX').value)/100*W-btnSize/2,parseFloat($('btnY').value)/100*H-btnSize/2,btnSize);
   place($('led'),parseFloat($('ledX').value)/100*W-6,parseFloat($('ledY').value)/100*H-6,12);
 
   render();
@@ -256,7 +257,7 @@ function pointerAngle(e,el){
 function beginDrag(e,type){
   e.preventDefault();
   const el=$(type==='tuning'?'tuning':'volume');
-  drag={type,start:pointerAngle(e,el),angle:type==='tuning'?tuningAngle:volumeAngle};
+  drag={type,start:pointerAngle(e,el),angle:type==='tuning'?tuningAngle:volumeAngle,moved:false};
   if(e.pointerId!=null)el.setPointerCapture?.(e.pointerId);
 }
 
@@ -266,6 +267,8 @@ function moveDrag(e){
   const el=$(drag.type==='tuning'?'tuning':'volume');
   let d=pointerAngle(e,el)-drag.start;
   if(d>180)d-=360;if(d<-180)d+=360;
+
+  if(Math.abs(d)>2) drag.moved=true;
 
   if(drag.type==='tuning'){
     tuningAngle+=d;
@@ -278,7 +281,12 @@ function moveDrag(e){
   render();
 }
 
-function endDrag(){drag=null;}
+function endDrag(){
+  if(drag && drag.type==='volume' && !drag.moved){
+    togglePower();
+  }
+  drag=null;
+}
 
 function win(){
   if(solved)return;
@@ -306,7 +314,6 @@ function win(){
 });
 
 $('power').addEventListener('click',togglePower);
-$('volume').addEventListener('click',togglePower);
 
 $('testRot').addEventListener('input',()=>{
   currentPos=parseFloat($('testRot').value);
