@@ -20,23 +20,23 @@
 #FX_ROOT_RADIO #body{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;pointer-events:none;z-index:1}
 #FX_ROOT_RADIO #arrow{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:top center;pointer-events:none;z-index:2;will-change:transform;transition:filter .3s ease}
 
-/* ИСПРАВЛЕННЫЙ CSS ДЛЯ КЛИКАБЕЛЬНОСТИ И ОТОБРАЖЕНИЯ РУЧЕК */
+/* Видимый стиль ручек даже при пустом URL */
 #FX_ROOT_RADIO .knob{
   position:absolute;
   border-radius:50%;
-  z-index:50 !important; /* Гарантирует, что ручки поверх всех слоев */
+  z-index:50 !important;
   cursor:grab;
   pointer-events:auto !important;
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  background-color:rgba(255,255,255,0.1);
+  background-color:#444;
+  border:2px solid #666;
   touch-action:none;
   transition:box-shadow .3s ease, filter .3s ease;
 }
 #FX_ROOT_RADIO .knob:active{cursor:grabbing}
 
-/* Питание поверх ручки, пропускает клики на саму ручку */
 #FX_ROOT_RADIO #power{
   position:absolute;
   border-radius:50%;
@@ -50,7 +50,7 @@
   background:transparent;
   border:none;
   user-select:none;
-  pointer-events:none !important; /* Пропускает клик на ручку снизу */
+  pointer-events:none !important;
 }
 #FX_ROOT_RADIO #power.on{color:#00c853;text-shadow:0 0 5px #00c853}
 
@@ -121,9 +121,9 @@
 <label>Размер (px)</label><input type="number" data-id="knobBigSize" value="70">
 
 <div class="section-title">4. Звуковые файлы</div>
-<label>Фоновый фоновый Трек 1 (mp3)</label><input type="text" data-id="noiseFile" value="1.mp3">
-<label>Целевой Трек 2 (mp3)</label><input type="text" data-id="signalFile" value="2.mp3">
-<label>Целевое значение для Трека 2</label><input type="number" data-id="targetAngle" value="230" step="1">
+<label>Фоновый Трек 1 (MP3)</label><input type="text" data-id="noiseFile" value="1.mp3">
+<label>Целевой Трек 2 (MP3)</label><input type="text" data-id="signalFile" value="2.mp3">
+<label>Порог переключения (Частота)</label><input type="number" data-id="targetAngle" value="230" step="1">
 
 <div class="section-title green">5. Настройки фона и неонов</div>
 <label style="display:flex;align-items:center;text-transform:none;color:#aaa">
@@ -192,12 +192,24 @@ const bars=[...ROOT.querySelectorAll('.sbar')];
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
 function updateImages(){
-  const u=$('knobsUrl').value.trim();
-  $('body').style.backgroundImage=$('bodyUrl').value.trim()?`url("${$('bodyUrl').value.trim()}")`:'none';
-  $('arrow').style.backgroundImage=$('arrowUrl').value.trim()?`url("${$('arrowUrl').value.trim()}")`:'none';
-  const knobStyle = u ? `url("${u}")` : 'none';
-  $('tuning').style.backgroundImage = knobStyle;
-  $('volume').style.backgroundImage = knobStyle;
+  const bUrl = $('bodyUrl').value.trim();
+  const aUrl = $('arrowUrl').value.trim();
+  const kUrl = $('knobsUrl').value.trim();
+
+  $('body').style.backgroundImage = bUrl ? `url("${bUrl}")` : 'none';
+  $('arrow').style.backgroundImage = aUrl ? `url("${aUrl}")` : 'none';
+  
+  if(kUrl){
+    $('tuning').style.backgroundImage = `url("${kUrl}")`;
+    $('volume').style.backgroundImage = `url("${kUrl}")`;
+    $('tuning').style.border = 'none';
+    $('volume').style.border = 'none';
+  } else {
+    $('tuning').style.backgroundImage = 'none';
+    $('volume').style.backgroundImage = 'none';
+    $('tuning').style.border = '2px solid #666';
+    $('volume').style.border = '2px solid #666';
+  }
 }
 
 function updateStyles(){
@@ -382,6 +394,7 @@ $('testRot').addEventListener('input',()=>{
 
 ROOT.querySelectorAll('input').forEach(el=>{
   el.addEventListener('input',()=>{updateImages();updateStyles();});
+  el.addEventListener('keyup',()=>{updateImages();updateStyles();});
   el.addEventListener('change',()=>{updateImages();updateStyles();});
 });
 
